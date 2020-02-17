@@ -1,13 +1,11 @@
 package ru.skillbranch.skillarticles.viewmodels.base
 
 import android.os.Bundle
-import android.view.AbsSavedState
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.*
-import ru.skillbranch.skillarticles.viewmodels.ArticleViewModel
 
-abstract class BaseViewModel<T: IViewModelState>(initState: T) : ViewModel() {
+abstract class BaseViewModel<T : IViewModelState>(initState: T) : ViewModel() {
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     val notifications = MutableLiveData<Event<Notify>>()
 
@@ -59,12 +57,11 @@ abstract class BaseViewModel<T: IViewModelState>(initState: T) : ViewModel() {
 
     /***
      * более компактная форма записи observe() метода LiveData вызывает лямбда выражение обработчик
-     * только в том случае если уведомление не было уже обработано ранее,
+     * только в том случае если уведомление не было уже обработанно ранее,
      * реализует данное поведение с помощью EventObserver
      */
     fun observeNotifications(owner: LifecycleOwner, onNotify: (notification: Notify) -> Unit) {
-        notifications.observe(owner,
-            EventObserver { onNotify(it) })
+        notifications.observe(owner, EventObserver { onNotify(it) })
     }
 
     /***
@@ -81,19 +78,16 @@ abstract class BaseViewModel<T: IViewModelState>(initState: T) : ViewModel() {
         }
     }
 
-    fun saveState(outState: Bundle) {
+    fun saveState(outState: Bundle){
         currentState.save(outState)
     }
 
-
     @Suppress("UNCHECKED_CAST")
-    fun restoreState(savedState: Bundle)  {
+    fun restoreState(savedState: Bundle){
         state.value = currentState.restore(savedState) as T
     }
 
-
 }
-
 
 class Event<out E>(private val content: E) {
     var hasBeenHandled = false

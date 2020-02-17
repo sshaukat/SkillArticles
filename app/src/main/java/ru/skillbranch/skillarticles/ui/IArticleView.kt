@@ -1,35 +1,19 @@
 package ru.skillbranch.skillarticles.ui
 
-
 interface IArticleView {
 
-    /**
-     * отрисовать все вхождения поискового запроса в контент (spannable)
-     */
+    // Отрисовать все вхождения поискового запроса в контент (spannable)
     fun renderSearchResult(searchResult: List<Pair<Int, Int>>)
 
-    /**
-     * отрисовать текущее положение поиска и перевести фокус на него (spannable)
-     */
-
+    // Отрисовать текущее положение поиска и перевести фокус на него (spannable)
     fun renderSearchPosition(searchPosition: Int)
 
-    /**
-     * очистить результаты поиска (удалить все spannable)
-     */
-
+    // Очистить результаты поиска (удалить все spannable)
     fun clearSearchResult()
 
-    /**
-     * показать search bar
-     */
-
+    // Показать search bar
     fun showSearchBar()
 
-    /**
-     * скрыть search bar
-     */
-
+    // Скрыть search bar
     fun hideSearchBar()
-
 }
