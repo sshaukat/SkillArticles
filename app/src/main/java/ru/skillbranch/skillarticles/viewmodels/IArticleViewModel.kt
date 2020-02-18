@@ -4,6 +4,8 @@ import androidx.lifecycle.LiveData
 import ru.skillbranch.skillarticles.data.ArticleData
 import ru.skillbranch.skillarticles.data.ArticlePersonalInfo
 
+
+
 interface IArticleViewModel {
     /**
      * Получение полной информации о статье из сети
