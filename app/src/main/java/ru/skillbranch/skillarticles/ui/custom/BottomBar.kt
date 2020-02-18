@@ -16,14 +16,14 @@ import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.ui.custom.behaviors.BottombarBehavior
 import kotlin.math.hypot
 
-class Bottombar @JvmOverloads constructor(
+class BottomBar @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : ConstraintLayout(context, attrs, defStyleAttr), CoordinatorLayout.AttachedBehavior {
     var isSearchMode = false
 
-    override fun getBehavior(): CoordinatorLayout.Behavior<Bottombar> {
+    override fun getBehavior(): CoordinatorLayout.Behavior<BottomBar> {
         return BottombarBehavior()
     }
 

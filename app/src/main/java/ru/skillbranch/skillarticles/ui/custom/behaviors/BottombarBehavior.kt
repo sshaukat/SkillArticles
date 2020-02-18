@@ -6,15 +6,15 @@ import android.view.View
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.math.MathUtils
 import androidx.core.view.ViewCompat
-import ru.skillbranch.skillarticles.ui.custom.Bottombar
+import ru.skillbranch.skillarticles.ui.custom.BottomBar
 
 
-class BottombarBehavior() : CoordinatorLayout.Behavior<Bottombar>() {
+class BottombarBehavior() : CoordinatorLayout.Behavior<BottomBar>() {
     constructor(context: Context, attrs: AttributeSet): this()
 
     override fun onStartNestedScroll(
         coordinatorLayout: CoordinatorLayout,
-        child: Bottombar,
+        child: BottomBar,
         directTargetChild: View,
         target: View,
         axes: Int,
@@ -25,7 +25,7 @@ class BottombarBehavior() : CoordinatorLayout.Behavior<Bottombar>() {
 
     override fun onNestedPreScroll(
         coordinatorLayout: CoordinatorLayout,
-        child: Bottombar,
+        child: BottomBar,
         target: View,
         dx: Int,
         dy: Int,
