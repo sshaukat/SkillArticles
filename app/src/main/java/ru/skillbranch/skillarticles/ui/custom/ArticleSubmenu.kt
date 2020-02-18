@@ -1,7 +1,6 @@
 package ru.skillbranch.skillarticles.ui.custom
 
 import android.content.Context
-import android.graphics.Path
 import android.os.Parcel
 import android.os.Parcelable
 import android.util.AttributeSet
@@ -14,41 +13,39 @@ import androidx.core.animation.doOnStart
 import com.google.android.material.shape.MaterialShapeDrawable
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.extensions.dpToPx
-import ru.skillbranch.skillarticles.ui.custom.behaviors.BottombarBehavior
 import ru.skillbranch.skillarticles.ui.custom.behaviors.SubmenuBehavior
-import java.time.format.DecimalStyle
 import kotlin.math.hypot
 
 class ArticleSubmenu @JvmOverloads constructor(
     context: Context,
-    attrs: AttributeSet,
-    defStyleAttr: Int=0
-    ) :ConstraintLayout(context, attrs,defStyleAttr), CoordinatorLayout.AttachedBehavior{
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
+) : ConstraintLayout(context, attrs, defStyleAttr), CoordinatorLayout.AttachedBehavior {
+    var isOpen = false
+    private var centerX: Float = context.dpToPx(200)
+    private var centerY: Float = context.dpToPx(96)
 
+    init {
+        View.inflate(context, R.layout.layout_submenu, this)
+        //add material bg for handle elevation and color surface
+        val materialBg = MaterialShapeDrawable.createWithElevationOverlay(context)
+        materialBg.elevation = elevation
+        background = materialBg
+    }
 
-    override fun getBehavior(): CoordinatorLayout.Behavior<ArticleSubmenu> {
+    override fun getBehavior(): CoordinatorLayout.Behavior<*> {
         return SubmenuBehavior()
     }
 
-    var isOpen=false
-    private var centerX: Float = context.dpToPx(200)
-    private var centerY: Float = context.dpToPx(96)
-    init {
-        View.inflate(context, R.layout.layout_submenu,this)
-        val materialBg=MaterialShapeDrawable.createWithElevationOverlay(context)
-        materialBg.elevation=elevation
-        background=materialBg
-    }
-
-    fun open(){
+    fun open() {
         if (isOpen || !isAttachedToWindow) return
-        isOpen=true
+        isOpen = true
         animatedShow()
     }
 
-    fun close(){
+    fun close() {
         if (!isOpen || !isAttachedToWindow) return
-        isOpen=false
+        isOpen = false
         animatedHide()
     }
 
