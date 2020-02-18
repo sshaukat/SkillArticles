@@ -1,6 +1,6 @@
 package ru.skillbranch.skillarticles.extensions
 
-fun String.indexesOf(substring: String, ignoreCase: Boolean = true): List<Int> {
+fun String?.indexesOf(substring: String, ignoreCase: Boolean = true): List<Int> {
     val result = mutableListOf<Int>()
     if (!this.isNullOrEmpty() && substring.isNotEmpty()) {
         var index = 0
