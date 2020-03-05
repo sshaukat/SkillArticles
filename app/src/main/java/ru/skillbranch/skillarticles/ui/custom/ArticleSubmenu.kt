@@ -7,19 +7,22 @@ import android.util.AttributeSet
 import android.view.View
 import android.view.ViewAnimationUtils
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.animation.doOnEnd
 import androidx.core.animation.doOnStart
 import com.google.android.material.shape.MaterialShapeDrawable
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.extensions.dpToPx
+import ru.skillbranch.skillarticles.ui.custom.behaviors.SubmenuBehavior
 import kotlin.math.hypot
 
 class ArticleSubmenu @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : ConstraintLayout(context, attrs, defStyleAttr) {
+) : ConstraintLayout(context, attrs, defStyleAttr), CoordinatorLayout.AttachedBehavior {
     var isOpen = false
+    // Координаты центра для ripple анимации
     private var centerX: Float = context.dpToPx(200)
     private var centerY: Float = context.dpToPx(96)
 
@@ -27,17 +30,18 @@ class ArticleSubmenu @JvmOverloads constructor(
         View.inflate(context, R.layout.layout_submenu, this)
         //add material bg for handle elevation and color surface
         val materialBg = MaterialShapeDrawable.createWithElevationOverlay(context)
-        materialBg.elevation = elevation
+        materialBg.elevation = elevation // передаем elevation нашей view
         background = materialBg
     }
 
-    fun open() {
+    fun open() { // Открытие submenu
         if (isOpen || !isAttachedToWindow) return
         isOpen = true
         animatedShow()
     }
 
-    fun close() {
+    fun close() { //
+        // Закрытие submenu
         if (!isOpen || !isAttachedToWindow) return
         isOpen = false
         animatedHide()
@@ -74,7 +78,7 @@ class ArticleSubmenu @JvmOverloads constructor(
     }
 
     //save state
-    override fun onSaveInstanceState(): Parcelable? {
+    override fun onSaveInstanceState(): Parcelable? { // Дополнительно закидываем состояние меню перед пересозданием активити
         val savedState = SavedState(super.onSaveInstanceState())
         savedState.ssIsOpen = isOpen
         return savedState
@@ -109,6 +113,10 @@ class ArticleSubmenu @JvmOverloads constructor(
             override fun createFromParcel(parcel: Parcel) = SavedState(parcel)
             override fun newArray(size: Int): Array<SavedState?> = arrayOfNulls(size)
         }
+    }
+
+    override fun getBehavior(): CoordinatorLayout.Behavior<ArticleSubmenu> {
+        return SubmenuBehavior()
     }
 
 }

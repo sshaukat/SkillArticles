@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ru.skillbranch.skillarticles.ui.custom.CheсkableImageView
+<!--    selectableItemBackground - эффект -->
+    <ru.skillbranch.skillarticles.ui.custom.CheckableImageView
         android:id="@+id/btn_text_down"
         android:layout_width="0dp"
         android:layout_height="40dp"
@@ -18,6 +19,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+<!--    Вертикальный разделитель-->
     <View
         android:id="@+id/divider_v"
         android:layout_width="1dp"
@@ -29,7 +31,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/divider_h"/>
 
-    <ru.skillbranch.skillarticles.ui.custom.CheсkableImageView
+    <ru.skillbranch.skillarticles.ui.custom.CheckableImageView
         android:id="@+id/btn_text_up"
         android:layout_width="0dp"
         android:layout_height="40dp"
@@ -42,7 +44,7 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/divider_v"
         app:layout_constraintTop_toTopOf="parent" />
-
+    <!--    Горизонтальный разделитель-->
     <View
         android:id="@+id/divider_h"
         android:layout_width="0dp"
