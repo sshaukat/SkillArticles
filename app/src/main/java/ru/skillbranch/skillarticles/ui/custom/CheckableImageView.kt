@@ -4,13 +4,14 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import android.widget.Checkable
-import  androidx.appcompat.widget.AppCompatImageView
+import android.widget.ImageView
 
+// Custom кнопка с сотоянием нажатия (реализует Checkable и View.OnClickListener)
 class CheckableImageView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : AppCompatImageView(context, attrs, defStyleAttr), Checkable, View.OnClickListener{
+) : ImageView(context, attrs, defStyleAttr), Checkable, View.OnClickListener{
     private var checked = false
 
     companion object {
@@ -18,10 +19,10 @@ class CheckableImageView @JvmOverloads constructor(
     }
 
     init {
-        setOnClickListener(this)
+        setOnClickListener(this) // Вешаем обработчик
     }
 
-    override fun onCreateDrawableState(extraSpace: Int): IntArray {
+    override fun onCreateDrawableState(extraSpace: Int): IntArray { // дополнительное view для нажатого состояния
         val drawableState =  super.onCreateDrawableState(extraSpace + 1)
         if(isChecked) View.mergeDrawableStates(drawableState, CHECKED_STATE_SET)
         return drawableState
@@ -30,7 +31,7 @@ class CheckableImageView @JvmOverloads constructor(
     override fun isChecked(): Boolean = checked
 
     override fun toggle() {
-        isChecked = !checked
+        isChecked = !checked // Меняем состояние на противоположное
     }
 
     override fun setChecked(check: Boolean) {
