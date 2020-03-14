@@ -2,18 +2,24 @@ package ru.skillbranch.skillarticles.extensions
 
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.marginBottom
-import androidx.core.view.marginLeft
-import androidx.core.view.marginRight
-import androidx.core.view.marginTop
 
-//Реализуй функцию расширения View.setMarginOptionally(left:Int = marginLeft, top : Int = marginTop,
-// right : Int = marginRight, bottom : Int = marginBottom), в качестве аргумента принимает значения
-// внешних отступов View (margin) в пикселях
-fun View.setMarginOptionally(left:Int = marginLeft, top : Int = marginTop, right : Int = marginRight, bottom : Int = marginBottom) {
-    val layoutParams = (this.layoutParams  as? ViewGroup.MarginLayoutParams)
-    layoutParams ?.bottomMargin = bottom
-    layoutParams ?.topMargin = top
-    layoutParams ?.rightMargin = right
-    layoutParams ?.leftMargin = left
+fun View.setMarginOptionally(left: Int? = null, top: Int? = null,
+                             right: Int? = null, bottom: Int? = null)
+{
+    layoutParams<ViewGroup.MarginLayoutParams> {
+        left?.let { leftMargin = it }
+        top?.let { topMargin =  it }
+        right?.let { rightMargin =  it }
+        bottom?.let { bottomMargin =  it }
+    }
+}
+
+fun View.setPaddingOptionally(left: Int = paddingLeft, top: Int = paddingTop,
+                             right: Int = paddingRight, bottom: Int = paddingBottom)
+{
+    setPadding(left , top , right, bottom)
+}
+
+inline fun <reified T : ViewGroup.LayoutParams> View.layoutParams(block: T.() -> Unit) {
+    if (layoutParams is T) block(layoutParams as T)
 }

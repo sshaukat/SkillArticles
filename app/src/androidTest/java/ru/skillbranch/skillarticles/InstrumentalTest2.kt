@@ -10,7 +10,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.*
 import ru.skillbranch.skillarticles.data.repositories.Element
-import ru.skillbranch.skillarticles.ui.custom.spans.BlockCodeSpan
 import ru.skillbranch.skillarticles.ui.custom.spans.OrderedListSpan
 
 
@@ -111,6 +110,7 @@ class InstrumentedTest2 {
         //check lineHeight SINGLE type
         fm.ascent = defaultAscent
         fm.descent = defaultDescent
+
         val size = span.getSize(paint, text, 0, text.length, fm)
         assertEquals(0, size)
         assertEquals((defaultAscent * 0.85f - 2 * padding).toInt(), fm.ascent)
