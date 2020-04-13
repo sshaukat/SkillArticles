@@ -21,7 +21,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".utils.TestActivity"/>
+<!--        <activity android:name=".utils.TestActivity"/>-->
     </application>
 
 </manifest>
