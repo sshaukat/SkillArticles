@@ -1,410 +1,423 @@
 package ru.skillbranch.skillarticles
 
-import android.graphics.*
-import android.graphics.drawable.Drawable
-import android.graphics.drawable.VectorDrawable
-import android.text.Layout
-import android.text.SpannableString
-import android.text.Spanned
-import android.text.TextPaint
+import android.view.View
+import android.widget.HorizontalScrollView
+import android.widget.ScrollView
+import androidx.core.widget.NestedScrollView
+import androidx.recyclerview.widget.RecyclerView
+import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.Espresso.pressBack
+import androidx.test.espresso.UiController
+import androidx.test.espresso.ViewAction
+import androidx.test.espresso.action.ScrollToAction
+import androidx.test.espresso.action.ViewActions.*
+import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.contrib.RecyclerViewActions
+import androidx.test.espresso.matcher.BoundedMatcher
+import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import org.junit.Assert.assertEquals
+import androidx.test.rule.ActivityTestRule
+import com.google.android.material.bottomnavigation.BottomNavigationItemView
+import junit.framework.Assert.assertEquals
+import kotlinx.android.synthetic.main.activity_root.*
+import kotlinx.android.synthetic.main.item_article.*
+import org.hamcrest.Description
+import org.hamcrest.Matcher
+import org.hamcrest.Matchers.allOf
+import org.hamcrest.core.AnyOf.anyOf
+import org.junit.FixMethodOrder
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers
-import org.mockito.Mockito.*
-import ru.skillbranch.skillarticles.ui.custom.spans.*
+import org.junit.runners.MethodSorters
+import ru.skillbranch.skillarticles.ui.RootActivity
+import ru.skillbranch.skillarticles.ui.articles.ArticleVH
+import ru.skillbranch.skillarticles.ui.custom.markdown.MarkdownContentView
+import java.lang.Thread.sleep
 
-
-/**
- * Instrumented test, which will execute on an Android device.
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(AndroidJUnit4::class)
-class InstrumentedTest1 {
+class InstrumentalTest1 {
+    @get:Rule
+    var activityRule: ActivityTestRule<RootActivity> = ActivityTestRule(RootActivity::class.java)
 
     @Test
-    fun draw_list_item() {
-        //settings
-        val color = Color.RED // цвет маркера
-        val gap = 24f // отступ
-        val radius = 8f // радиус маркера
+    fun module1() {
+        onView(withId(R.id.nav_bookmarks))
+            .perform(click())
 
-        //defaults
-        val defaultColor = Color.GRAY
-        val cml = 0 //current margin location
-        val ltop = 0 //line top
-        val lbase = 60 //line baseline
-        val lbottom = 80 //line bottom
-
-        //mocks
-        val canvas = mock(Canvas::class.java)
-        val paint = mock(Paint::class.java)
-        `when`(paint.color).thenReturn(defaultColor) // переопределение значений которые возвращают методы при вызове (paint.color будет возвращать defaultColor)
-        val layout = mock(Layout::class.java)
-
-        val text = SpannableString("text")
-
-        val span = UnorderedListSpan(gap, radius, color)
-        text.setSpan(span, 0, text.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-
-        //check leading margin
-        assertEquals((4 * radius + gap).toInt(), span.getLeadingMargin(true))
-
-        //check bullet draw
-        span.drawLeadingMargin(
-            canvas, paint, cml, 1,
-            ltop, lbase, lbottom, text, 0, text.length,
-            true, layout
-        )
-
-        //check order call
-        val inOrder = inOrder(paint, canvas)
-        //check first set color to paint
-        inOrder.verify(paint).color = color // проверка установки цвета
-        //check draw circle bullet
-        inOrder.verify(canvas).drawCircle(
-            gap + cml + radius,
-            (lbottom - ltop) / 2f + ltop,
-            radius,
-            paint
-        )
-        //check paint color restore
-        inOrder.verify(paint).color = defaultColor
-    }
-
-    @Test
-    fun draw_quote() { // Тест отрисовки цитат (вертикальная линия)
-        //settings
-        val color = Color.RED
-        val gap = 24f
-        val lineWidth = 8f // ширина линии отрисовки цитат
-
-        //defaults
-        val defaultColor = Color.GRAY
-        val cml = 0 //current margin location
-        val ltop = 0 //line top
-        val lbase = 60 //line baseline
-        val lbottom = 80 //line bottom
-
-        //mocks
-        val canvas = mock(Canvas::class.java)
-        val paint = mock(Paint::class.java)
-        `when`(paint.color).thenReturn(defaultColor)
-        val layout = mock(Layout::class.java)
-
-        val text = SpannableString("text")
-
-        val span = BlockquotesSpan(gap, lineWidth, color)
-        text.setSpan(span, 0, text.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-
-        //check leading margin (проверка отступа)
-        assertEquals((lineWidth + gap).toInt(), span.getLeadingMargin(true))
-
-        //check line draw
-        span.drawLeadingMargin(
-            canvas, paint, cml, 1,
-            ltop, lbase, lbottom, text, 0, text.length,
-            true, layout
-        )
-
-        //check order call
-        val inOrder = inOrder(paint, canvas)
-        //check first set color to paint
-        inOrder.verify(paint).color = color
-        inOrder.verify(paint).strokeWidth = lineWidth
-        //check draw circle bullet
-        inOrder.verify(canvas).drawLine(
-            lineWidth / 2f,
-            ltop.toFloat(),
-            lineWidth / 2,
-            lbottom.toFloat(),
-            paint
-        )
-        //check paint color restore
-        inOrder.verify(paint).color = defaultColor
-    }
-
-    @Test
-    fun draw_header() {
-        //settings
-        val levels = 1..6
-        val textColor = Color.RED
-        val lineColor = Color.GREEN
-        val marginTop = 24f
-        val marginBottom = 16f
-
-        //defaults
-        val canvasWidth = 700
-        val defaultColor = Color.GRAY
-        val cml = 0 //current margin location
-        val ltop = 0 //line top
-        val lbase = 60 //line baseline
-        val lbottom = 80 //line bottom
-        val defaultAscent = -30
-        val defaultDescent = 10
-
-        for (level in levels){ // все размеры header-ов
-            //mocks
-            val canvas = mock(Canvas::class.java)
-            `when`(canvas.width).thenReturn(canvasWidth)
-            val paint = mock(Paint::class.java)
-            `when`(paint.color).thenReturn(defaultColor)
-            val measurePaint = mock(TextPaint::class.java)
-            val drawPaint = mock(TextPaint::class.java)
-            val layout = mock(Layout::class.java)
-            val fm = mock(Paint.FontMetricsInt::class.java)
-            fm.ascent = defaultAscent
-            fm.descent = defaultDescent
-
-            val text = SpannableString("text")
-
-            val span = HeaderSpan(level, textColor, lineColor, marginTop, marginBottom)
-            text.setSpan(span, 0, text.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-
-            //check leading margin
-            assertEquals(0, span.getLeadingMargin(true))
-
-            //check measure state
-            span.updateMeasureState(measurePaint)
-            verify(measurePaint).textSize *= span.sizes[level]!!
-            verify(measurePaint).isFakeBoldText = true
-
-            //check draw state
-            span.updateDrawState(drawPaint)
-            verify(drawPaint).textSize *= span.sizes[level]!!
-            verify(drawPaint).isFakeBoldText = true
-            verify(drawPaint).color = textColor
-
-            //check change line height
-            span.chooseHeight(text,0, text.length.inc(), 0,0, fm)
-            assertEquals((defaultAscent - marginTop).toInt(), fm.ascent)
-            assertEquals(((defaultDescent - defaultAscent) * span.linePadding + marginBottom).toInt(), fm.descent)
-            assertEquals(fm.top, fm.ascent)
-            assertEquals(fm.bottom, fm.descent)
-
-            //check line draw
-            span.drawLeadingMargin(
-                canvas, paint, cml, 1,
-                ltop, lbase, lbottom, text, 0, text.length,
-                true, layout
+        activityRule.activity.run {
+            assertEquals(
+                "title after navigate to Bookmarks fragment",
+                "Bookmarks",
+                toolbar.title.toString()
             )
+        }
 
-            val inOrder = inOrder(paint, canvas)
+        onView(withId(R.id.nav_transcriptions))
+            .perform(click())
 
-            if(level == 1 || level ==2){
-                inOrder.verify(paint).color = lineColor
-                val lh = (paint.descent() - paint.ascent()) * span.sizes[level]!!
-                val lineOffset = lbase + lh * span.linePadding
-                inOrder.verify(canvas).drawLine(0f, lineOffset, canvasWidth.toFloat(), lineOffset, paint)
+        activityRule.activity.run {
+            assertEquals(
+                "title after navigate to Transcriptions fragment",
+                "Transcriptions",
+                toolbar.title.toString()
+            )
+        }
 
-                inOrder.verify(paint).color = defaultColor
-            }
+        onView(withId(R.id.nav_articles))
+            .perform(click())
+
+        activityRule.activity.run {
+            assertEquals(
+                "title after navigate to Articles fragment",
+                "Articles",
+                toolbar.title.toString()
+            )
+        }
+
+        pressBack()
+
+        activityRule.activity.run {
+            assertEquals(
+                "title after back to Transcriptions fragment",
+                "Transcriptions",
+                toolbar.title.toString()
+            )
+        }
+
+        pressBack()
+
+        activityRule.activity.run {
+            assertEquals(
+                "title after back to Bookmarks fragment",
+                "Bookmarks",
+                toolbar.title.toString()
+            )
+        }
+
+        pressBack()
+
+        activityRule.activity.run {
+            assertEquals(
+                "title after back to Articles fragment",
+                "Articles",
+                toolbar.title.toString()
+            )
         }
     }
 
-
     @Test
-    fun draw_rule() {
-        //settings
-        val color = Color.RED
-        val width = 24f // ширина разделительной линии
-
-        //defaults
-        val canvasWidth = 700
-        val defaultColor = Color.GRAY
-        val cml = 0 //current margin location
-        val ltop = 0 //line top
-        val lbase = 60 //line baseline
-        val lbottom = 80 //line bottom
-
-        //mocks
-        val canvas = mock(Canvas::class.java)
-        `when`(canvas.width).thenReturn(canvasWidth)
-        val paint = mock(Paint::class.java)
-        `when`(paint.color).thenReturn(defaultColor)
-
-        val text = SpannableString("text")
-
-        val span = HorizontalRuleSpan(width, color)
-        text.setSpan(span, 0, text.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-
-        //check draw rule line
-        span.draw(canvas, text, 0, text.length, cml.toFloat(), ltop, lbase, lbottom, paint)
-
-        val inOrder = inOrder(paint, canvas)
-
-        inOrder.verify(paint).color = color // проверка цвета
-
-        inOrder.verify(canvas).drawLine( // проверка отрисовки линии
-            0f,
-            (ltop + lbottom) / 2f,
-            canvasWidth.toFloat(),
-            (ltop + lbottom) / 2f,
-            paint
-        )
-
-        inOrder.verify(paint).color = defaultColor
-
-
-    }
-
-
-    @Test
-    fun draw_inline_code() {
-        //settings
-        val textColor: Int = Color.RED
-        val bgColor: Int = Color.GREEN
-        val cornerRadius: Float = 8f
-        val padding: Float = 8f
-
-        //defaults
-        val canvasWidth = 700
-        val defaultColor = Color.GRAY
-        val measureText = 100f
-        val cml = 0 //current margin location
-        val ltop = 0 //line top
-        val lbase = 60 //line baseline
-        val lbottom = 80 //line bottom
-
-        //mocks
-        val canvas = mock(Canvas::class.java)
-        `when`(canvas.width).thenReturn(canvasWidth)
-        val paint = mock(Paint::class.java)
-        `when`(paint.color).thenReturn(defaultColor)
-        `when`(
-            paint.measureText( // измерить ширину шрифта
-                ArgumentMatchers.anyString(),
-                ArgumentMatchers.anyInt(),
-                ArgumentMatchers.anyInt()
+    fun module2() {
+        activityRule.activity.run {
+            val rv = findViewById<RecyclerView>(R.id.rv_articles)
+            assertEquals(
+                "RecycleView ArticleItemView count",
+                6,
+                rv.adapter!!.itemCount
             )
-        ).thenReturn(measureText)
-        val fm = mock(Paint.FontMetricsInt::class.java)
 
-        val text = SpannableString("text")
+        }
+        onView(withId(R.id.rv_articles))
+            .perform(RecyclerViewActions.actionOnItemAtPosition<ArticleVH>(3, click()));
 
-        val span = InlineCodeSpan(textColor, bgColor, cornerRadius, padding)
-        text.setSpan(span, 0, text.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        activityRule.activity.run {
+            assertEquals(
+                "title after navigate to Article fragment",
+                "Observe LiveData from ViewModel in Fragment",
+                toolbar.title.toString()
+            )
 
-        //check measure size
-        val size = span.getSize(paint, text, 0, text.length, fm)
-        assertEquals((2 * padding + measureText).toInt(), size)
-
-
-        //check draw inline code
-        span.draw(canvas, text, 0, text.length, cml.toFloat(), ltop, lbase, lbottom, paint)
-
-        val inOrder = inOrder(paint, canvas)
-
-        //check draw background
-        inOrder.verify(paint).color = bgColor
-        inOrder.verify(canvas).drawRoundRect(
-            RectF(0f, ltop.toFloat(), measureText + 2 * padding, lbottom.toFloat()),
-            cornerRadius,
-            cornerRadius,
-            paint
-        )
-
-        //check draw text
-        inOrder.verify(paint).color = textColor
-        inOrder.verify(canvas).drawText(text, 0, text.length, cml + padding, lbase.toFloat(), paint)
-        inOrder.verify(paint).color = defaultColor
+            assertEquals(
+                "subtitle after navigate to Article fragment",
+                "Android",
+                toolbar.subtitle.toString()
+            )
+        }
     }
 
     @Test
-    fun draw_link() {
-        //settings
-        val iconColor: Int = Color.RED
-        val padding: Float = 8f
-        val textColor: Int = Color.BLUE
+    fun module3() {
+        onView(withId(R.id.rv_articles))
+            .perform(RecyclerViewActions.actionOnItemAtPosition<ArticleVH>(2, click()));
 
-        //defaults
-        val canvasWidth = 700
-        val defaultColor = Color.GRAY
-        val measureText = 100f
-        val defaultAscent = -30
-        val defaultDescent = 10
-        val cml = 0 //current margin location
-        val ltop = 0 //line top
-        val lbase = 60 //line baseline
-        val lbottom = 80 //line bottom
-
-        //mocks
-        val canvas = mock(Canvas::class.java)
-        `when`(canvas.width).thenReturn(canvasWidth)
-        val paint = mock(Paint::class.java)
-        `when`(paint.color).thenReturn(defaultColor)
-        `when`(
-            paint.measureText(
-                ArgumentMatchers.anyString(),
-                ArgumentMatchers.anyInt(),
-                ArgumentMatchers.anyInt()
+        activityRule.activity.run {
+            assertEquals(
+                "Title in toolbar Article fragment",
+                "Using Safe args plugin — current state of affairs",
+                toolbar.title.toString()
             )
-        ).thenReturn(measureText)
-        val fm = mock(Paint.FontMetricsInt::class.java)
-        fm.ascent = defaultAscent
-        fm.descent = defaultDescent
 
-        //spy - объекты, реальная имплементация класса
-        val linkDrawable: Drawable = spy(VectorDrawable())
-        val path: Path = spy(Path())
+            assertEquals(
+                "Subtitle in toolbar Article fragment",
+                "Android",
+                toolbar.subtitle.toString()
+            )
 
-        val text = SpannableString("text")
+            assertEquals(
+                "Article Title in Article fragment",
+                "Using Safe args plugin — current state of affairs",
+                tv_title.text.toString()
+            )
 
-        val span = IconLinkSpan(linkDrawable, iconColor, padding, textColor)
-        text.setSpan(span, 0, text.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        span.path = path // подставляем spy объект
+            assertEquals(
+                "Article date in Article fragment",
+                "11:03:02 11.04.20",
+                tv_date.text.toString()
+            )
 
-        //check measure size
-        val size = span.getSize(paint, text, 0, text.length, fm)
-        assertEquals((defaultDescent - defaultAscent + padding + measureText).toInt(), size)
+            assertEquals(
+                "Article Author in Article fragment",
+                "Veronika Petruskova",
+                tv_author.text.toString()
+            )
+        }
+        sleep(2000)
 
-        //check drawable set bounds and set tint
-        verify(linkDrawable).setBounds(0, 0, fm.descent - fm.ascent, fm.descent - fm.ascent)
-        verify(linkDrawable).setTint(iconColor)
+        activityRule.activity.run {
+            assertEquals(
+                "Markdown Content View child count",
+                33,
+                findViewById<MarkdownContentView>(R.id.tv_text_content).childCount
+            )
+        }
 
-        //check draw icon and text
-        span.draw(canvas, text, 0, text.length, cml.toFloat(), ltop, lbase, lbottom, paint)
+        onView(withId(R.id.et_comment))
+            .perform(customScrollTo())
+            .check(matches(isDisplayed()))
 
-        val inOrder = inOrder(paint, canvas, path, linkDrawable) // список проверяемых
-
-        //check path effect
-        verify(paint, atLeastOnce()).pathEffect = any() // есть хотя бы один pathEffect
-        verify(paint, atLeastOnce()).strokeWidth = 0f // хотя бы один раз изменил толщину линии до 0 (прерывистая линия)
-        inOrder.verify(paint).color = textColor // была смена цвета
-
-        //check reset path
-        inOrder.verify(path).reset() //check reset before draw
-        verify(path).moveTo(cml + span.iconSize + padding, lbottom.toFloat())
-        verify(path).lineTo(cml + span.iconSize + padding + span.textWidth, lbottom.toFloat())
-
-        //check draw path
-        inOrder.verify(canvas).drawPath(path, paint)
-
-        //check draw icon
-        inOrder.verify(canvas).save() // сохраняет текущую канву
-        inOrder.verify(canvas).translate( // перемещаем
-            cml.toFloat(),
-            (lbottom - linkDrawable.bounds.bottom).toFloat()
-        )
-        inOrder.verify(linkDrawable).draw(canvas) // отрисовываем в нужном положении иконку (draw не учитывает смещения, поэтому сами ранее сдвинули)
-        inOrder.verify(canvas).restore() // Возвращаем на место канву
-
-        //check draw text
-        inOrder.verify(paint).color = textColor // Проверяем цвет отрисовки
-        inOrder.verify(canvas).drawText(
-            text,
-            0,
-            text.length,
-            cml + span.iconSize + padding,
-            lbase.toFloat(),
-            paint
-        )
-        inOrder.verify(paint).color = defaultColor // и после отрисовки цвет восстановлен
     }
 
+    @Test
+    fun module4() {
+        onView(withId(R.id.nav_profile))
+            .perform(click())
 
+        activityRule.activity.run {
+            assertEquals(
+                "title after navigate to Profile fragment",
+                "Authorization",
+                toolbar.title.toString()
+            )
+        }
+
+        onView(withId(R.id.tv_privacy))
+            .perform(click())
+
+        activityRule.activity.run {
+            assertEquals(
+                "title after navigate to Privacy fragment",
+                "Privacy policy",
+                toolbar.title.toString()
+            )
+        }
+
+        pressBack()
+
+        activityRule.activity.run {
+            assertEquals(
+                "title after back to Authorization fragment",
+                "Authorization",
+                toolbar.title.toString()
+            )
+        }
+
+        pressBack()
+
+        activityRule.activity.run {
+            assertEquals(
+                "title after back to Articles fragment",
+                "Articles",
+                toolbar.title.toString()
+            )
+        }
+
+        onView(withId(R.id.rv_articles))
+            .perform(RecyclerViewActions.actionOnItemAtPosition<ArticleVH>(1, click()));
+
+        activityRule.activity.run {
+            assertEquals(
+                "Title in toolbar Article fragment",
+                "Architecture Components pitfalls",
+                toolbar.title.toString()
+            )
+        }
+        sleep(2000)
+
+        onView(withId(R.id.et_comment))
+            .perform(customScrollTo(), replaceText("comment text"), pressImeActionButton())
+
+        activityRule.activity.run {
+            assertEquals(
+                "title after send comment",
+                "Authorization",
+                toolbar.title.toString()
+            )
+        }
+
+        onView(withId(R.id.tv_privacy))
+            .perform(click())
+
+        activityRule.activity.run {
+            assertEquals(
+                "title after navigate to Privacy fragment",
+                "Privacy policy",
+                toolbar.title.toString()
+            )
+        }
+
+        pressBack()
+
+        activityRule.activity.run {
+            assertEquals(
+                "title after back to Authorization fragment",
+                "Authorization",
+                toolbar.title.toString()
+            )
+        }
+
+        onView(withId(R.id.btn_login))
+            .perform(click())
+
+        activityRule.activity.run {
+            assertEquals(
+                "Title in toolbar Article fragment after login",
+                "Architecture Components pitfalls",
+                toolbar.title.toString()
+            )
+        }
+
+        pressBack()
+
+        activityRule.activity.run {
+            assertEquals(
+                "title after back to Articles fragment",
+                "Articles",
+                toolbar.title.toString()
+            )
+        }
+
+        onView(withId(R.id.nav_profile))
+            .perform(click())
+
+        activityRule.activity.run {
+            assertEquals(
+                "title after navigate to Profile fragment after login",
+                "Profile",
+                toolbar.title.toString()
+            )
+        }
+    }
+
+    @Test
+    fun module5() {
+        onView(withId(R.id.nav_bookmarks))
+            .perform(click())
+
+        onView(withId(R.id.nav_transcriptions))
+            .perform(click())
+
+        onView(withId(R.id.nav_articles))
+            .perform(click())
+
+        pressBack()
+
+        onView(withId(R.id.nav_transcriptions))
+            .check(matches(withBottomNavItemCheckedStatus(true)))
+    }
+
+    @Test
+    fun module6() {
+        onView(withId(R.id.nav_bookmarks))
+            .perform(click())
+
+        onView(withId(R.id.nav_transcriptions))
+            .perform(click())
+
+        onView(withId(R.id.nav_profile))
+            .perform(click())
+
+        onView(withId(R.id.nav_articles))
+            .perform(click())
+
+        onView(withId(R.id.nav_profile))
+            .perform(click())
+
+        onView(withId(R.id.btn_login))
+            .perform(click())
+
+        activityRule.activity.run {
+            assertEquals(
+                "Title in toolbar Profile fragment after login",
+                "Profile",
+                toolbar.title.toString()
+            )
+        }
+
+        pressBack()
+
+        activityRule.activity.run {
+            assertEquals(
+                "title after back to Articles fragment",
+                "Articles",
+                toolbar.title.toString()
+            )
+        }
+
+        pressBack()
+
+        activityRule.activity.run {
+            assertEquals(
+                "title after back to Profile fragment",
+                "Profile",
+                toolbar.title.toString()
+            )
+        }
+    }
+
+    private fun customScrollTo(): ViewAction = object : ViewAction {
+        override fun getConstraints(): Matcher<View> {
+            return allOf(
+                withEffectiveVisibility(Visibility.VISIBLE),
+                isDescendantOfA(
+                    anyOf(
+                        isAssignableFrom(ScrollView::class.java),
+                        isAssignableFrom(HorizontalScrollView::class.java),
+                        isAssignableFrom(NestedScrollView::class.java)
+                    )
+                )
+            )
+        }
+
+        override fun getDescription(): String {
+            return "scrollTo"
+        }
+
+        override fun perform(
+            uiController: UiController,
+            view: View
+        ) {
+            ScrollToAction().perform(uiController, view)
+        }
+    }
+
+    private fun withBottomNavItemCheckedStatus(isChecked: Boolean): Matcher<View?> {
+        return object : BoundedMatcher<View?, BottomNavigationItemView>(
+            BottomNavigationItemView::class.java
+        ) {
+            var triedMatching = false
+            override fun describeTo(description: Description) {
+                if (triedMatching) {
+                    description.appendText("with BottomNavigationItem check status: $isChecked")
+                    description.appendText("But was: ${!isChecked}")
+                }
+            }
+
+            override fun matchesSafely(item: BottomNavigationItemView): Boolean {
+                triedMatching = true
+                return item.itemData.isChecked == isChecked
+            }
+        }
+    }
 }
-
 

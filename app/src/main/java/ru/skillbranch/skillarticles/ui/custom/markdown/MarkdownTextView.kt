@@ -3,7 +3,6 @@ package ru.skillbranch.skillarticles.ui.custom.markdown
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Rect
 import android.text.Spannable
 import android.text.Spanned
@@ -18,9 +17,8 @@ import ru.skillbranch.skillarticles.extensions.dpToIntPx
 class MarkdownTextView constructor(
     context: Context,
     fontSize: Float,
-    mockHelper: SearchBgHelper? = null // for mock
-):  TextView(context, null, 0), IMarkdownView {
-
+    mockHelper: SearchBgHelper? = null
+) : TextView(context, null, 0), IMarkdownView {
 
     constructor(context: Context, fontSize: Float) : this(context, fontSize, null)
 
@@ -33,21 +31,17 @@ class MarkdownTextView constructor(
     override val spannableContent: Spannable
         get() = text as Spannable
 
-
     private val color = context.attrValue(R.attr.colorOnBackground)
     private val focusRect = Rect()
 
-    private var searchBgHelper = SearchBgHelper(context) { top, bottom ->
-        focusRect.set(0, top - context.dpToIntPx(56), width, bottom + context.dpToIntPx(56))
-        //show rect on view with animation
-        requestRectangleOnScreen(focusRect, false)
-    }
+    private val searchBgHelper: SearchBgHelper
 
     init {
         searchBgHelper = mockHelper ?: SearchBgHelper(context) { top, bottom ->
             focusRect.set(0, top - context.dpToIntPx(56), width, bottom + context.dpToIntPx(56))
-            //show rect on view with animation
-            requestRectangleOnScreen(focusRect, false)
+
+            // show rect on view with animation
+            requestRectangleOnScreen(focusRect)
         }
         setTextColor(color)
         textSize = fontSize
@@ -56,7 +50,7 @@ class MarkdownTextView constructor(
 
     override fun onDraw(canvas: Canvas) {
         if (text is Spanned && layout != null) {
-            canvas.withTranslation (totalPaddingLeft.toFloat(), totalPaddingTop.toFloat()) {
+            canvas.withTranslation(totalPaddingStart.toFloat(), totalPaddingTop.toFloat()) {
                 searchBgHelper.draw(canvas, text as Spanned, layout)
             }
         }
