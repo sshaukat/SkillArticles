@@ -119,7 +119,8 @@ class InstrumentalTest1 {
 
         }
         onView(withId(R.id.rv_articles))
-            .perform(RecyclerViewActions.actionOnItemAtPosition<ArticleVH>(3, click()));
+            .perform(Recit fetch
+                    yclerViewActions.actionOnItemAtPosition<ArticleVH>(3, click()));
 
         activityRule.activity.run {
             assertEquals(
