@@ -7,15 +7,17 @@ import android.text.style.LeadingMarginSpan
 import androidx.annotation.ColorInt
 import androidx.annotation.Px
 
-// https://prnt.sc/rbd2bf
 class UnorderedListSpan(
-    @Px private val gapWidth: Float,
-    @Px private val bulletRadius: Float,
-    @ColorInt private val bulletColor: Int
+    @Px
+    private val gapWidth: Float,
+    @Px
+    private val bulletRadius: Float,
+    @ColorInt
+    private val bulletColor: Int
 ) : LeadingMarginSpan {
 
     override fun getLeadingMargin(first: Boolean): Int {
-        return (4 * bulletRadius + gapWidth).toInt()
+        return (4*bulletRadius +gapWidth).toInt()
     }
 
     override fun drawLeadingMargin(
@@ -37,10 +39,8 @@ class UnorderedListSpan(
     private inline fun Paint.withCustomColor(block: () -> Unit) {
         val oldColor = color
         val oldStyle = style
-
         color = bulletColor
         style = Paint.Style.FILL
-
         block()
 
         color = oldColor

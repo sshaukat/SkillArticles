@@ -10,25 +10,29 @@ import androidx.annotation.Px
 import androidx.annotation.VisibleForTesting
 
 class InlineCodeSpan(
-    @ColorInt private val textColor: Int,
-    @ColorInt private val bgColor: Int,
-    @Px private val cornerRadius: Float,
-    @Px private val padding: Float
+    @ColorInt
+    private val textColor: Int,
+    @ColorInt
+    private val bgColor: Int,
+    @Px
+    private val cornerRadius: Float,
+    @Px
+    private val padding: Float
 ) : ReplacementSpan() {
-    private var rect: RectF = RectF()
-    private var measureWidth: Int = 0
-    lateinit var bounds: IntRange
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    var rect: RectF = RectF()
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    var measureWidth: Int = 0
 
     override fun getSize(
         paint: Paint,
-        text: CharSequence,
+        text: CharSequence?,
         start: Int,
         end: Int,
         fm: Paint.FontMetricsInt?
     ): Int {
-        bounds = start..end
         paint.forText {
-            val measureText = paint.measureText(text.toString(), start, end) // ширина текста
+            val measureText = paint.measureText(text.toString(), start, end)
             measureWidth = (measureText + 2 * padding).toInt()
         }
         return measureWidth
@@ -45,9 +49,8 @@ class InlineCodeSpan(
         bottom: Int,
         paint: Paint
     ) {
-
         paint.forBackground {
-            rect.set(x, top.toFloat(), x + measureWidth, y + paint.descent())
+            rect.set(x, top.toFloat(), x + measureWidth, bottom.toFloat())
             canvas.drawRoundRect(rect, cornerRadius, cornerRadius, paint)
         }
 
@@ -79,7 +82,6 @@ class InlineCodeSpan(
 
         color = bgColor
         style = Paint.Style.FILL
-
         block()
 
         color = oldColor

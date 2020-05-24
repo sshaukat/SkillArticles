@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Parcel
 import android.os.Parcelable
 import android.util.AttributeSet
+import android.util.Log
 import android.util.SparseArray
 import android.view.View
 import android.view.ViewGroup
@@ -34,6 +35,7 @@ class MarkdownContentView @JvmOverloads constructor(
             it.fontSize = value
         }
     }
+    var isLoading: Boolean = true
     val padding = context.dpToIntPx(8)
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -78,7 +80,6 @@ class MarkdownContentView @JvmOverloads constructor(
 
     fun setContent(content: List<MarkdownElement>) {
         elements = content
-        var index = 0
         content.forEach {
             when (it) {
                 is MarkdownElement.Text -> {
@@ -109,8 +110,6 @@ class MarkdownContentView @JvmOverloads constructor(
                         it.image.alt
                     )
                     addView(iv)
-                    layoutManager.attachToParent(iv, index)
-                    index++
                 }
 
                 is MarkdownElement.Scroll -> {
@@ -120,8 +119,6 @@ class MarkdownContentView @JvmOverloads constructor(
                         it.blockCode.text
                     )
                     addView(sv)
-                    layoutManager.attachToParent(sv, index)
-                    index++
                 }
             }
         }
@@ -135,6 +132,7 @@ class MarkdownContentView @JvmOverloads constructor(
 
         if (searchResult.isEmpty()) return
 
+
         val bounds = elements.map { it.bounds }
         val result = searchResult.groupByBounds(bounds)
 
@@ -145,7 +143,9 @@ class MarkdownContentView @JvmOverloads constructor(
         }
     }
 
-    fun renderSearchPosition(searchPosition: Pair<Int, Int>?) {
+    fun renderSearchPosition(
+        searchPosition: Pair<Int, Int>?
+    ) {
         searchPosition ?: return
         val bounds = elements.map { it.bounds }
 
@@ -169,37 +169,37 @@ class MarkdownContentView @JvmOverloads constructor(
     }
 
     fun setCopyListener(listener: (String) -> Unit) {
-        children
-            .filterIsInstance<MarkdownCodeView>()
+        children.filterIsInstance<MarkdownCodeView>()
             .forEach { it.copyListener = listener }
     }
 
     override fun onSaveInstanceState(): Parcelable? {
-        val savedState = SavedState(super.onSaveInstanceState())
+        val savedState =
+            SavedState(super.onSaveInstanceState())
         savedState.layout = layoutManager
+        Log.e("MarkdownContentView", "PARENT SAVE INSTANT STATE: ");
         return savedState
-    }
-
-    override fun dispatchSaveInstanceState(container: SparseArray<Parcelable>?) {
-        children
-            .filter { it !is MarkdownTextView }
-            .forEachIndexed { index, view ->
-                layoutManager.attachToParent(view, index)
-            }
-        children
-            .filter { it !is MarkdownTextView }
-            .forEach {
-                if (it !is MarkdownTextView) it.saveHierarchyState(layoutManager.container)
-            }
-        dispatchFreezeSelfOnly(container)
     }
 
     override fun onRestoreInstanceState(state: Parcelable) {
         super.onRestoreInstanceState(state)
         if (state is SavedState) layoutManager = state.layout
-        children
-            .filter { it !is MarkdownTextView }
+        Log.e("MarkdownContentView", "PARENT RESTORE INSTANT STATE: $childCount");
+        children.filter { it !is MarkdownTextView }
             .forEachIndexed { index, it -> layoutManager.attachToParent(it, index) }
+    }
+
+    override fun dispatchSaveInstanceState(container: SparseArray<Parcelable>?) {
+        //save childer manually without mardown text view
+        children.filter { it !is MarkdownTextView }
+            .forEach {
+                if (it !is MarkdownTextView) it.saveHierarchyState(layoutManager.container)
+            }
+        children.filter { it !is MarkdownTextView }
+            .forEachIndexed { index, view ->
+                layoutManager.attachToParent(view, index)
+            }
+        dispatchFreezeSelfOnly(container)
     }
 
 
@@ -209,7 +209,8 @@ class MarkdownContentView @JvmOverloads constructor(
 
         constructor(parcel: Parcel) : this() {
             ids = parcel.readArrayList(Int::class.java.classLoader) as ArrayList<Int>
-            container = parcel.readSparseArray<Parcelable>(this::class.java.classLoader) as SparseArray<Parcelable>
+            container =
+                parcel.readSparseArray<Parcelable>(this::class.java.classLoader) as SparseArray<Parcelable>
         }
 
         fun attachToParent(view: View, index: Int) {
@@ -227,28 +228,33 @@ class MarkdownContentView @JvmOverloads constructor(
             parcel.writeSparseArray(container)
         }
 
-        override fun describeContents() = 0
+        override fun describeContents(): Int = 0
 
         companion object CREATOR : Parcelable.Creator<LayoutManager> {
             override fun createFromParcel(parcel: Parcel): LayoutManager {
                 return LayoutManager(parcel)
             }
+
             override fun newArray(size: Int): Array<LayoutManager?> {
                 return arrayOfNulls(size)
             }
         }
     }
 
+
     private class SavedState : BaseSavedState, Parcelable {
         lateinit var layout: LayoutManager
 
         constructor(superState: Parcelable?) : super(superState)
 
+        @Suppress("UNCHECKED_CAST")
         constructor(src: Parcel) : super(src) {
+            //restore state from parcel
             layout = src.readParcelable(LayoutManager::class.java.classLoader)!!
         }
 
         override fun writeToParcel(dst: Parcel, flags: Int) {
+            //write state to parcel
             super.writeToParcel(dst, flags)
             dst.writeParcelable(layout, flags)
         }
@@ -257,6 +263,7 @@ class MarkdownContentView @JvmOverloads constructor(
 
         companion object CREATOR : Parcelable.Creator<SavedState> {
             override fun createFromParcel(parcel: Parcel) = SavedState(parcel)
+
             override fun newArray(size: Int): Array<SavedState?> = arrayOfNulls(size)
         }
     }

@@ -2,31 +2,23 @@ package ru.skillbranch.skillarticles.extensions
 
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.children
-import androidx.navigation.NavDestination
-import com.google.android.material.bottomnavigation.BottomNavigationView
+import androidx.core.view.marginBottom
+import androidx.core.view.marginEnd
+import androidx.core.view.marginStart
+import androidx.core.view.marginTop
 
-fun View.setMarginOptionally(top: Int = 0, right: Int = 0, bottom: Int = 0, left: Int = 0) {
-    (layoutParams as ViewGroup.MarginLayoutParams).run {
+
+fun View.setMarginOptionally(left:Int = marginStart, top : Int = marginTop, right : Int = marginEnd, bottom : Int = marginBottom) {
+    val layoutParams = this.layoutParams as ViewGroup.MarginLayoutParams
+    layoutParams.apply {
         leftMargin = left
-        rightMargin = right
         topMargin = top
+        rightMargin = right
         bottomMargin = bottom
     }
     requestLayout()
 }
 
-fun View.setPaddingOptionally(
-    left:Int = paddingLeft,
-    top : Int = paddingTop,
-    right : Int = paddingRight,
-    bottom : Int = paddingBottom
-){
+fun View.setPaddingOptionally(left: Int = paddingStart, top: Int = paddingTop, right: Int = paddingEnd, bottom: Int = paddingBottom) {
     setPadding(left, top, right, bottom)
-}
-
-fun BottomNavigationView.selectDestination(destination: NavDestination) {
-    menu.findItem(destination.id)?.let {
-        it.isChecked = true
-    } ?: run { menu.children.last().isChecked = true }
 }

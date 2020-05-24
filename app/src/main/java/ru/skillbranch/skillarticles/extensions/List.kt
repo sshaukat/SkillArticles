@@ -1,13 +1,16 @@
 package ru.skillbranch.skillarticles.extensions
 
-fun List<Pair<Int, Int>>.groupByBounds(bounds: List<Pair<Int, Int>>): List<List<Pair<Int, Int>>> =
-    bounds.map { boundary ->
-        this.filter { it.second > boundary.first && it.first < boundary.second }
-            .map {
-                when {
-                    it.first < boundary.first -> Pair(boundary.first, it.second)
-                    it.second > boundary.second -> Pair(it.first, boundary.second)
-                    else -> it
-                }
-            }
+import kotlin.math.max
+import kotlin.math.min
+
+fun List<Pair<Int, Int>>.groupByBounds(bounds: List<Pair<Int, Int>>) : List<List<Pair<Int, Int>>> {
+    val result = mutableListOf<List<Pair<Int, Int>>>()
+    bounds.forEach { (lowInterval, highInterval) ->
+        result.add(this
+            .filter { (lowFound, highFound) ->
+                lowFound < highInterval && highFound > lowInterval
+            }.map { (low, high) -> Pair(max(lowInterval, low), min(highInterval, high)) })
+
     }
+    return result
+}

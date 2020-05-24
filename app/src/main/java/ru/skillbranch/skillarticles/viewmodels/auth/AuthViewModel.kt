@@ -10,15 +10,15 @@ class AuthViewModel(handle: SavedStateHandle) : BaseViewModel<AuthState>(handle,
     private val repository = RootRepository
 
     init {
-        subscribeOnDataSource(repository.isAuth()) { isAuth, currentState ->
-            currentState.copy(isAuth = isAuth)
+        subscribeOnDataSource(repository.isAuth()) { isAuth, state ->
+            state.copy(isAuth = isAuth)
         }
     }
 
-    override fun handleLogin(login: String, password: String, destination: Int?) {
+    override fun handleLogin(login: String, pass: String, dest: Int?) {
         repository.setAuth(true)
-        navigate(NavigationCommand.FinishLogin(destination))
+        navigate(NavigationCommand.FinishLogin(dest))
     }
 }
 
-data class AuthState(val isAuth: Boolean = false): IViewModelState
+data class AuthState(val isAuth: Boolean = false) : IViewModelState
