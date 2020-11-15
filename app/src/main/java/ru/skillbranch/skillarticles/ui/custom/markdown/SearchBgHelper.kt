@@ -49,10 +49,10 @@ class SearchBgHelper(
         mockDrawable ?: GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
             cornerRadii = floatArrayOf(
-                radius, radius,
-                0f, 0f,
-                0f, 0f,
-                radius, radius
+                radius, radius,  // Top left radius in px
+                0f, 0f,   // Top right radius in px
+                0f, 0f,     // Bottom right radius in px
+                radius, radius      // Bottom left radius in px
             )
             color = ColorStateList.valueOf(alphaColor)
             setStroke(borderWidth, secondaryColor)
@@ -66,14 +66,15 @@ class SearchBgHelper(
             setStroke(borderWidth, secondaryColor)
         }
     }
+
     private val drawableRight: Drawable by lazy {
         mockDrawable ?: GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
             cornerRadii = floatArrayOf(
-                0f, 0f,
-                radius, radius,
-                radius, radius,
-                0f, 0f
+                0f, 0f,  // Top left radius in px
+                radius, radius,   // Top right radius in px
+                radius, radius,     // Bottom right radius in px
+                0f, 0f      // Bottom left radius in px
             )
             color = ColorStateList.valueOf(alphaColor)
             setStroke(borderWidth, secondaryColor)
@@ -82,7 +83,8 @@ class SearchBgHelper(
 
     private lateinit var render: SearchBgRender
     private val singleLineRender: SearchBgRender = SingleLineRender(padding, drawable)
-    private val multiLineRender: SearchBgRender = MultiLineRender(padding, drawableLeft, drawableMiddle, drawableRight)
+    private val multiLineRender: SearchBgRender =
+        MultiLineRender(padding, drawableLeft, drawableMiddle, drawableRight)
 
     private lateinit var spans: Array<out SearchSpan>
     private lateinit var headerSpans: Array<out HeaderSpan>
@@ -104,7 +106,7 @@ class SearchBgHelper(
             startLine = layout.getLineForOffset(spanStart)
             endLine = layout.getLineForOffset(spanEnd)
 
-            if(it is SearchFocusSpan) {
+            if (it is SearchFocusSpan) {
                 //if search focus invoke listener for focus
                 focusListener?.invoke(layout.getLineTop(startLine), layout.getLineBottom(startLine))
             }
@@ -114,14 +116,14 @@ class SearchBgHelper(
             topExtraPadding = 0
             bottomExtraPadding = 0
 
-            if(headerSpans.isNotEmpty()) {
+            if (headerSpans.isNotEmpty()) {
                 topExtraPadding =
-                    if(spanStart in headerSpans[0].firstLineBounds
+                    if (spanStart in headerSpans[0].firstLineBounds
                         || spanEnd in headerSpans[0].firstLineBounds
                     ) headerSpans[0].topExtraPadding else 0
 
                 bottomExtraPadding =
-                    if(spanStart in headerSpans[0].lastLineBounds
+                    if (spanStart in headerSpans[0].lastLineBounds
                         || spanEnd in headerSpans[0].lastLineBounds
                     ) headerSpans[0].bottomExtraPadding else 0
             }
@@ -130,6 +132,7 @@ class SearchBgHelper(
             endOffset = layout.getPrimaryHorizontal(spanEnd).toInt()
 
             render = if (startLine == endLine) singleLineRender else multiLineRender
+
             render.draw(
                 canvas,
                 layout,
@@ -160,7 +163,7 @@ abstract class SearchBgRender(
     )
 
     fun getLineTop(layout: Layout, line: Int): Int {
-        return layout.getLineTopWithoutPadding(line) //TODO extension
+        return layout.getLineTopWithoutPadding(line)
     }
 
     fun getLineBottom(layout: Layout, line: Int): Int {
@@ -199,11 +202,10 @@ class MultiLineRender(
     private val drawableMiddle: Drawable,
     private val drawableRight: Drawable
 ) : SearchBgRender(padding) {
-
     private var lineTop: Int = 0
     private var lineBottom: Int = 0
-    private var lineEndOffset: Int = 0
     private var lineStartOffset: Int = 0
+    private var lineEndOffset: Int = 0
 
     override fun draw(
         canvas: Canvas,
@@ -222,7 +224,7 @@ class MultiLineRender(
         drawStart(canvas, startOffset - padding, lineTop, lineEndOffset, lineBottom)
 
         //draw middle line
-        for(line in startLine.inc() until endLine) {
+        for (line in startLine.inc() until endLine) {
             lineTop = getLineTop(layout, line)
             lineBottom = getLineBottom(layout, line)
             drawableMiddle.setBounds(
@@ -235,7 +237,7 @@ class MultiLineRender(
         }
 
         //draw last line
-        lineStartOffset = (layout.getLineLeft(startLine) - padding).toInt()
+        lineStartOffset = (layout.getLineLeft(endLine) - padding).toInt()
         lineTop = getLineTop(layout, endLine)
         lineBottom = getLineBottom(layout, endLine) - bottomExtraPadding
         drawEnd(canvas, lineStartOffset, lineTop, endOffset + padding, lineBottom)

@@ -1,7 +1,6 @@
 package ru.skillbranch.skillarticles.ui.custom.spans
 
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.text.Layout
 import android.text.Spanned
@@ -13,6 +12,7 @@ import androidx.annotation.ColorInt
 import androidx.annotation.IntRange
 import androidx.annotation.Px
 import androidx.annotation.VisibleForTesting
+
 
 class HeaderSpan constructor(
     @IntRange(from = 1, to = 6)
@@ -31,6 +31,7 @@ class HeaderSpan constructor(
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     val linePadding = 0.4f
     private var originAscent = 0
+
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     val sizes = mapOf(
         1 to 2f,
@@ -54,10 +55,9 @@ class HeaderSpan constructor(
         lineHeight: Int,
         fm: Paint.FontMetricsInt?
     ) {
-
         fm ?: return
-        text as Spanned
 
+        text as Spanned
         val spanStart = text.getSpanStart(this)
         val spanEnd = text.getSpanEnd(this)
 
@@ -70,13 +70,15 @@ class HeaderSpan constructor(
             fm.ascent = originAscent
         }
 
+        //line break +1 character
         if (spanEnd == end.dec()) {
-            val originDescend = fm.descent
-            val originHeight = fm.descent - originAscent
-            fm.descent = (originHeight * linePadding + marginBottom).toInt()
-            bottomExtraPadding = fm.descent - originDescend
+            val originDescent = fm.descent
+            val originalHeight = fm.descent - originAscent
+            fm.descent = (originalHeight * linePadding + marginBottom).toInt()
+            bottomExtraPadding = fm.descent - originDescent
             lastLineBounds = start..end.dec()
         }
+
         fm.top = fm.ascent
         fm.bottom = fm.descent
     }
@@ -101,10 +103,12 @@ class HeaderSpan constructor(
         lineTop: Int, lineBaseline: Int, lineBottom: Int, text: CharSequence?, lineStart: Int,
         lineEnd: Int, isFirstLine: Boolean, layout: Layout?
     ) {
-        if ((level == 1 || level == 2) && (text as Spanned).getSpanEnd(this) == lineEnd) { // Для заголовков 1-2 уровня и последней строки - рисуем отделяющую линию
+        //for 1st & 2nd levels & the last line
+        if ((level in 1..2) && ((text as Spanned).getSpanEnd(this) == lineEnd)) {
             paint.forLine {
                 val lh = (paint.descent() - paint.ascent()) * sizes.getOrElse(level) { 1f }
                 val lineOffset = lineBaseline + lh * linePadding
+
                 canvas.drawLine(
                     0f,
                     lineOffset,
@@ -114,7 +118,6 @@ class HeaderSpan constructor(
                 )
             }
         }
-        //canvas.drawFontLines(lineTop, lineBottom, lineBaseline, paint)
     }
 
     override fun getLeadingMargin(first: Boolean): Int {
@@ -127,24 +130,13 @@ class HeaderSpan constructor(
         val oldWidth = strokeWidth
 
         color = dividerColor
-        style = Paint.Style.STROKE // просто линия
+        style = Paint.Style.STROKE
         strokeWidth = 0f
 
         block()
-        // Восстановим старый цвет - чтобы bullet цветом не продолжил рисовать прочие элементы
+
         color = oldColor
         style = oldStyle
         strokeWidth = oldWidth
-    }
-
-    private fun Canvas.drawFontLines( top: Int, bottom: Int, lineBaseline: Int, paint: Paint) {
-        drawLine(0f, top + 0f, width + 0f, top + 0f, Paint().apply { color = Color.BLUE })
-        drawLine(0f, bottom + 0f, width + 0f, bottom + 0f, Paint().apply { color = Color.GREEN })
-        drawLine(
-            0f,
-            lineBaseline + 0f,
-            width + 0f,
-            lineBaseline + 0f,
-            Paint().apply { color = Color.RED })
     }
 }

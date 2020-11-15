@@ -6,12 +6,14 @@ import android.text.style.ReplacementSpan
 import androidx.annotation.ColorInt
 import androidx.annotation.Px
 
+
 class HorizontalRuleSpan(
     @Px
     val ruleWidth: Float,
     @ColorInt
     val ruleColor: Int
 ) : ReplacementSpan() {
+
     override fun getSize(
         paint: Paint,
         text: CharSequence?,
@@ -33,7 +35,7 @@ class HorizontalRuleSpan(
         bottom: Int,
         paint: Paint
     ) {
-        paint.forLine{
+        paint.forLine {
             canvas.drawLine(
                 0f,
                 (top + bottom) / 2f,
