@@ -29,16 +29,23 @@ fun Context.dpToIntPx(dp: Int): Int {
     ).toInt()
 }
 
-fun Context.hideKeyboard(view: View) {
+fun Context.hideKeyboard(view: View){
     val imm = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
     imm.hideSoftInputFromWindow(view.windowToken, 0)
 }
-
-fun Context.showKeyboard(view: EditText) {
+fun Context.showKeyboard(view: EditText){
     val imm = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
-    imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
+    imm.showSoftInput(view,InputMethodManager.SHOW_IMPLICIT)
 }
 
+fun Context.attrValue( @AttrRes res: Int ): Int {
+    val tv = TypedValue()
+    return if (this.theme.resolveAttribute(res, tv, true)) tv.data
+    else throw Resources.NotFoundException("Resource with id $res not found")
+}
+
+
+@Suppress("DEPRECATION")
 val Context.isNetworkAvailable: Boolean
     get() {
         val cm = this.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -53,11 +60,3 @@ val Context.isNetworkAvailable: Boolean
             cm.activeNetworkInfo?.run { isConnectedOrConnecting } ?: false
         }
     }
-
-fun Context.attrValue(@AttrRes res: Int): Int {
-    val value: Int?
-    val tv = TypedValue()
-    if (this.theme.resolveAttribute(res, tv, true)) value = tv.data
-    else throw Resources.NotFoundException("Resource with id $res not found")
-    return value
-}

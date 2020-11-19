@@ -7,19 +7,17 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import java.util.*
 
 object JsonConverter {
-
     //json converter
-    val moshi: Moshi = Moshi.Builder()
-        .add(DateAdapter())
-        .add(KotlinJsonAdapterFactory()) // for reflection
+    val moshi = Moshi.Builder()
+        .add(DateAdapter()) //convert long timestamp to Date
+        .add(KotlinJsonAdapterFactory()) //convert json to class by reflection
         .build()
 
-    class DateAdapter {
+    class DateAdapter{
         @FromJson
-        fun fromJson(timestamp: Long) = Date(timestamp)
+        fun fromJson(timestamp:Long) = Date(timestamp)
 
         @ToJson
         fun toJson(date: Date) = date.time
     }
 }
-

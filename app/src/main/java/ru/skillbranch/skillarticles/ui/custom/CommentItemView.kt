@@ -48,6 +48,7 @@ class CommentItemView(context: Context) : ViewGroup(context, null, 0) {
         }
     }
 
+
     init {
         setPadding(defaultHSpace, defaultVSpace, defaultHSpace, defaultVSpace)
         tv_date = TextView(context).apply {
@@ -67,7 +68,7 @@ class CommentItemView(context: Context) : ViewGroup(context, null, 0) {
         addView(tv_author)
 
         tv_body = TextView(context).apply {
-            id = R.id.tv_comment_body
+            id=R.id.tv_comment_body
             setTextColor(grayColor)
             textSize = 14f
         }
@@ -210,4 +211,5 @@ class CommentItemView(context: Context) : ViewGroup(context, null, 0) {
             iv_answer_icon.isVisible = item.answerTo != null
         }
     }
+
 }

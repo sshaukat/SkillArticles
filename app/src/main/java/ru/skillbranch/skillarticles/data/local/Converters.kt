@@ -10,26 +10,15 @@ class DateConverter {
     fun timestampToDate(timestamp: Long): Date = Date(timestamp)
 
     @TypeConverter
-    fun dateToTimestamp(date: Date): Long = date.time
+    fun dateToTimestamp(date:Date):Long = date.time
 }
 
-class MarkdownConverter {
+class MarkdownConverter{
     @TypeConverter
-    fun toMarkdown(content: String?): List<MarkdownElement>? =
-        content?.let { MarkdownParser.parse(it) }
+    fun toMarkdown(content:String?): List<MarkdownElement>? = content?.let { MarkdownParser.parse(it) }
 }
 
-class ListConverter {
-    companion object {
-        const val SPLITTING_SYMBOLS = ";"
-    }
-
+class ListConverter{
     @TypeConverter
-    fun String?.toListOfStrings(): List<String> =
-        this?.split(SPLITTING_SYMBOLS) ?: emptyList()
-
-
-    @TypeConverter
-    fun List<String>.toStringConverter(): String =
-        this.joinToString(separator = SPLITTING_SYMBOLS) { it }
+    fun toList(str: String?): List<String> = str?.split(",") ?: emptyList()
 }

@@ -5,28 +5,25 @@ import ru.skillbranch.skillarticles.data.local.PrefManager
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
-class PrefDelegate<T>(private val defaultValue: T) {
+class PrefDelegate<T>(private val defaultValue: T)  {
     private var storedValue: T? = null
 
     operator fun provideDelegate(
         thisRef: PrefManager,
-        property: KProperty<*>
+        prop: KProperty<*>
     ): ReadWriteProperty<PrefManager, T> {
-        val key = property.name
+        val key = prop.name
         return object : ReadWriteProperty<PrefManager, T> {
-
             override fun getValue(thisRef: PrefManager, property: KProperty<*>): T {
-                val prefs = thisRef.preferences
-
                 if (storedValue == null) {
                     @Suppress("UNCHECKED_CAST")
-                    storedValue = when (defaultValue) {
-                        is Boolean -> prefs.getBoolean(key, defaultValue as Boolean) as T
-                        is String -> prefs.getString(key, defaultValue as String) as T
-                        is Float -> prefs.getFloat(key, defaultValue as Float) as T
-                        is Int -> prefs.getInt(key, defaultValue as Int) as T
-                        is Long -> prefs.getLong(key, defaultValue as Long) as T
-                        else -> throw NotFoundRealizationException(defaultValue)
+                    storedValue = when(defaultValue) {
+                        is Int -> thisRef.preferences.getInt(key, defaultValue as Int) as T
+                        is Long -> thisRef.preferences.getLong(key, defaultValue as Long) as T
+                        is Float -> thisRef.preferences.getLong(key, defaultValue as Long) as T
+                        is String -> thisRef.preferences.getString(key, defaultValue as String) as T
+                        is Boolean -> thisRef.preferences.getBoolean(key, defaultValue as Boolean) as T
+                        else -> error("This type can not be stored into Preferences")
                     }
                 }
                 return storedValue!!
@@ -40,7 +37,7 @@ class PrefDelegate<T>(private val defaultValue: T) {
                         is Float -> putFloat(key, value)
                         is Int -> putInt(key, value)
                         is Long -> putLong(key, value)
-                        else -> throw NotFoundRealizationException(value)
+                        else ->  error("Only primitive type can be storied into Preferences")
                     }
                     apply()
                 }
@@ -49,26 +46,22 @@ class PrefDelegate<T>(private val defaultValue: T) {
 
         }
     }
-
-
-    class NotFoundRealizationException(value: Any?) :
-        Exception("Not found realization for $value")
 }
 
 class PrefObjDelegate<T>(
     private val adapter: JsonAdapter<T>
-) {
+){
     private var storedValue: T? = null
 
     operator fun provideDelegate(
         thisRef: PrefManager,
-        property: KProperty<*>
+        prop: KProperty<*>
     ): ReadWriteProperty<PrefManager, T?> {
-        val key = property.name
-        return object : ReadWriteProperty<PrefManager, T?> {
+        val key = prop.name
+        return object : ReadWriteProperty<PrefManager, T?>{
             override fun getValue(thisRef: PrefManager, property: KProperty<*>): T? {
-                if (storedValue == null) {
-                    storedValue = thisRef.preferences.getString(key, null)
+                if (storedValue == null){
+                    storedValue = thisRef.preferences.getString(key,null)
                         ?.let { adapter.fromJson(it) }
                 }
                 return storedValue
@@ -76,10 +69,12 @@ class PrefObjDelegate<T>(
 
             override fun setValue(thisRef: PrefManager, property: KProperty<*>, value: T?) {
                 storedValue = value
-                thisRef.preferences.edit()
-                    .putString(key, value?.let { adapter.toJson(it) })
-                    .apply()
+                with(thisRef.preferences.edit()){
+                    putString(key, value?.let{adapter.toJson(value)})
+                    apply()
+                }
             }
         }
     }
 }
+

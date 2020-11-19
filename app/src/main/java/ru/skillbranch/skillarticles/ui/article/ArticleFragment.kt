@@ -5,8 +5,8 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.text.SpannableStringBuilder
-import android.text.method.LinkMovementMethod
+import android.text.style.URLSpan
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.WindowManager
@@ -14,6 +14,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SearchView
 import androidx.core.text.buildSpannedString
+import androidx.core.text.inSpans
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
@@ -33,14 +34,14 @@ import kotlinx.android.synthetic.main.layout_bottombar.view.*
 import kotlinx.android.synthetic.main.layout_submenu.view.*
 import kotlinx.android.synthetic.main.search_view_layout.view.*
 import ru.skillbranch.skillarticles.R
-import ru.skillbranch.skillarticles.data.repositories.Element
 import ru.skillbranch.skillarticles.data.repositories.MarkdownElement
 import ru.skillbranch.skillarticles.extensions.*
 import ru.skillbranch.skillarticles.ui.base.*
 import ru.skillbranch.skillarticles.ui.custom.ArticleSubmenu
 import ru.skillbranch.skillarticles.ui.custom.Bottombar
 import ru.skillbranch.skillarticles.ui.custom.ShimmerDrawable
-import ru.skillbranch.skillarticles.ui.custom.markdown.MarkdownBuilder
+import ru.skillbranch.skillarticles.ui.custom.spans.IconLinkSpan
+import ru.skillbranch.skillarticles.ui.custom.spans.InlineCodeSpan
 import ru.skillbranch.skillarticles.ui.delegates.RenderProp
 import ru.skillbranch.skillarticles.viewmodels.article.ArticleState
 import ru.skillbranch.skillarticles.viewmodels.article.ArticleViewModel
@@ -48,13 +49,12 @@ import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
 import ru.skillbranch.skillarticles.viewmodels.base.Loading
 import ru.skillbranch.skillarticles.viewmodels.base.ViewModelFactory
 
-
 class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
     private val args: ArticleFragmentArgs by navArgs()
     override val viewModel: ArticleViewModel by viewModels {
         ViewModelFactory(
             owner = this,
-            params = args.articleId
+            params = args.artcileId
         )
     }
 
@@ -63,7 +63,7 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
             viewModel.handleReplyTo(it.id, it.user.name)
             et_comment.requestFocus()
             scroll.smoothScrollTo(0, wrap_comments.top)
-            requireContext().showKeyboard(et_comment)
+            et_comment.context.showKeyboard(et_comment)
         }
     }
 
@@ -82,7 +82,7 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
             )
     }
 
-    override val prepareBottombar: (BottombarBuilder.() -> Unit)? = {
+    override val prepareBottombar: (BottomBarBuilder.() -> Unit)? = {
         this.addView(R.layout.layout_submenu)
             .addView(R.layout.layout_bottombar)
             .setVisibility(false)
@@ -99,27 +99,24 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
     }
 
     override fun renderLoading(loadingState: Loading) {
-        when (loadingState) {
-            Loading.SHOW_LOADING -> if (!refresh.isRefreshing) root.progress.isVisible = true
-            Loading.SHOW_BLOCKING_LOADING -> refresh.isRefreshing = false
-            Loading.HIDE_LOADING -> {
+        when(loadingState){
+            Loading.HIDE_LOADING -> if(!refresh.isRefreshing) root.progress.isVisible = true
+            Loading.SHOW_BLOCKING_LOADING -> root.progress.isVisible = false
+            Loading.SHOW_LOADING ->{
                 root.progress.isVisible = false
-                if (refresh.isRefreshing) refresh.isRefreshing = false
+                if(refresh.isRefreshing) refresh.isRefreshing = false
             }
         }
     }
 
     override fun setupViews() {
-        // window resize options
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
-//            root.window.setDecorFitsSystemWindows(true)
-//        else
+        //window resize options
         root.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
 
-        setupBottomBar()
+        setupBottombar()
         setupSubmenu()
 
-        // init views
+        //init views
         val avatarSize = root.dpToIntPx(40)
         val cornerRadius = root.dpToIntPx(8)
 
@@ -206,20 +203,20 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
         tv_author.text = args.author
         tv_date.text = args.date.format()
 
-        et_comment.text = SpannableStringBuilder(viewModel.currentState.commentText ?: "")
 
         et_comment.setOnEditorActionListener { view, _, _ ->
-            requireContext().hideKeyboard(view)
+            root.hideKeyboard(view)
             viewModel.handleSendComment(view.text.toString())
-            //view.clearFocus()
             true
         }
 
         et_comment.setOnFocusChangeListener { _, hasFocus -> viewModel.handleCommentFocus(hasFocus) }
 
         wrap_comments.setEndIconOnClickListener { view ->
-            requireContext().hideKeyboard(view)
+            view.context.hideKeyboard(view)
             viewModel.handleClearComment()
+            //et_comment.text = null
+            //et_comment.clearFocus()
         }
 
         refresh.setOnRefreshListener {
@@ -232,6 +229,7 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
         }
 
         viewModel.observeList(viewLifecycleOwner) { commentsAdapter.submitList(it) }
+
     }
 
     override fun onDestroyView() {
@@ -249,13 +247,14 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
         scroll.setMarginOptionally(bottom = 0)
     }
 
+
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
         val menuItem = menu.findItem(R.id.action_search)
         val searchView = (menuItem?.actionView as SearchView)
         searchView.queryHint = getString(R.string.article_search_placeholder)
 
-        //restore searchView
+        //restore SearchView
         if (binding.isSearch) {
             menuItem.expandActionView()
             searchView.setQuery(binding.searchQuery, false)
@@ -274,8 +273,8 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
                 viewModel.handleSearchMode(false)
                 return true
             }
-        })
 
+        })
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 viewModel.handleSearch(query)
@@ -286,9 +285,9 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
                 viewModel.handleSearch(newText)
                 return true
             }
+
         })
     }
-
 
     private fun setupSubmenu() {
         submenu.btn_text_up.setOnClickListener { viewModel.handleUpText() }
@@ -296,7 +295,7 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
         submenu.switch_mode.setOnClickListener { viewModel.handleNightMode() }
     }
 
-    private fun setupBottomBar() {
+    private fun setupBottombar() {
         bottombar.btn_like.setOnClickListener { viewModel.handleLike() }
         bottombar.btn_bookmark.setOnClickListener { viewModel.handleBookmark() }
         bottombar.btn_share.setOnClickListener { viewModel.handleShare() }
@@ -304,13 +303,13 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
 
         bottombar.btn_result_up.setOnClickListener {
             if (!tv_text_content.hasFocus()) tv_text_content.requestFocus()
-            requireContext().hideKeyboard(it)
+            root.hideKeyboard(it)
             viewModel.handleUpResult()
         }
 
         bottombar.btn_result_down.setOnClickListener {
             if (!tv_text_content.hasFocus()) tv_text_content.requestFocus()
-            requireContext().hideKeyboard(it)
+            root.hideKeyboard(it)
             viewModel.handleDownResult()
         }
 
@@ -330,11 +329,12 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
         }
     }
 
-    inner class ArticleBinding() : Binding() {
+    inner class ArticleBinding : Binding() {
         var isFocusedSearch: Boolean = false
         var searchQuery: String? = null
 
         private var isLoadingContent by RenderProp(false) {
+            Log.e("ArticleFragment", "content is loading: $it");
             tv_text_content.isLoading = it
             if (it) setupCopyListener()
         }
@@ -358,8 +358,7 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
                 submenu.btn_text_down.isChecked = true
             }
         }
-
-        private var isDarkMode: Boolean by RenderProp(value = false, needInit = false) {
+        private var isDarkMode: Boolean by RenderProp(false, false) {
             submenu.switch_mode.isChecked = it
             root.delegate.localNightMode = if (it) AppCompatDelegate.MODE_NIGHT_YES
             else AppCompatDelegate.MODE_NIGHT_NO
@@ -382,42 +381,12 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
             }
         }
 
-        private var searchResults: List<Pair<Int, Int>> by RenderProp(emptyList<Pair<Int, Int>>())
+        private var searchResults: List<Pair<Int, Int>> by RenderProp(emptyList())
         private var searchPosition: Int by RenderProp(0)
 
-        private var content: List<MarkdownElement> by RenderProp(emptyList<MarkdownElement>()) {
+        private var content: List<MarkdownElement> by RenderProp(emptyList()) {
             tv_text_content.setContent(it)
         }
-
-        val markdownBuilder = MarkdownBuilder(requireContext())
-
-        private var hashtags: List<String> by RenderProp(emptyList()) {
-            tv_hashtags.setText(
-                buildSpannedString {
-                    it.forEach {
-                        markdownBuilder.buildElement(Element.InlineCode(it), this)
-                        append(" ")
-                    }
-                },
-                TextView.BufferType.SPANNABLE
-            )
-        }
-
-        private var source: String by RenderProp("") {
-            if (it.isNotEmpty()) {
-                tv_source.isVisible = true
-                tv_source.setText(
-                    buildSpannedString {
-                        markdownBuilder.buildElement(Element.Link(it, "Article source"), this)
-                    },
-                    TextView.BufferType.SPANNABLE
-                )
-                tv_source.movementMethod = LinkMovementMethod.getInstance()
-            } else {
-                tv_source.isVisible = false
-            }
-        }
-
 
         private var answerTo by RenderProp("Comment") { wrap_comments.hint = it }
         private var isShowBottombar by RenderProp(true) {
@@ -428,6 +397,47 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
         private var comment by RenderProp("") {
             et_comment.setText(it)
             if (it.isBlank() && et_comment.hasFocus()) et_comment.clearFocus()
+        }
+
+
+
+        private val colorPrimary = root.attrValue(R.attr.colorPrimary)
+        private val colorSecondary = root.attrValue(R.attr.colorSecondary)
+        private val colorOnSurface = root.attrValue(R.attr.colorOnSurface)
+        private val opacityColorSurface = root.getColor(R.color.opacity_color_surface)
+        private val cornerRadius = root.dpToPx(8)
+        private val gap = root.dpToPx(8)
+        private val strikeWidth = root.dpToPx(4)
+
+
+        private var tags: List<String> by RenderProp(emptyList()) {list->
+            tv_hashtags.isVisible = list.isNotEmpty()
+            val spanned = buildSpannedString {
+                list.forEachIndexed { index, s ->
+                    inSpans(InlineCodeSpan(colorOnSurface, opacityColorSurface, cornerRadius, gap)) {
+                        append(s)
+                    }
+                    if(index < list.size - 1) append(" ")
+                }
+            }
+            tv_hashtags.setText(spanned, TextView.BufferType.SPANNABLE)
+        }
+
+        private val linkIcon = root.getDrawable(R.drawable.ic_link_black_24dp)!!.apply {
+            setTint(colorSecondary)
+        }
+
+        private var source by RenderProp("") {
+            tv_source.isVisible = it.isNotBlank()
+            val spanned = buildSpannedString {
+                inSpans(
+                    IconLinkSpan(linkIcon, gap, colorPrimary, strikeWidth),
+                    URLSpan(it)
+                ) {
+                    append("Article source")
+                }
+            }
+            tv_source.setText(spanned, TextView.BufferType.SPANNABLE)
         }
 
         override val afterInflated: (() -> Unit)? = {
@@ -457,10 +467,6 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
             isBigText = data.isBigText
             isDarkMode = data.isDarkMode
             content = data.content
-            source = data.source ?: ""
-            hashtags = data.tags
-
-
             isLoadingContent = data.isLoadingContent
             isSearch = data.isSearch
             searchQuery = data.searchQuery
@@ -469,16 +475,16 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
             answerTo = data.answerTo ?: "Comment"
             isShowBottombar = data.showBottomBar
             comment = data.commentText ?: ""
+            tags = data.tags
+            source = data.source ?: "Source"
         }
 
         override fun saveUi(outState: Bundle) {
             outState.putBoolean(::isFocusedSearch.name, toolbar.search_view?.hasFocus() ?: false)
-            //outState.putString(::comment.name, comment)
         }
 
         override fun restoreUi(savedState: Bundle?) {
             isFocusedSearch = savedState?.getBoolean(::isFocusedSearch.name) ?: false
-            // comment = savedState?.getString(::comment.name, "dd") ?: ""
         }
     }
 }
