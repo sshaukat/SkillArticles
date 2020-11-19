@@ -48,7 +48,6 @@ class CommentItemView(context: Context) : ViewGroup(context, null, 0) {
         }
     }
 
-
     init {
         setPadding(defaultHSpace, defaultVSpace, defaultHSpace, defaultVSpace)
         tv_date = TextView(context).apply {
@@ -68,7 +67,7 @@ class CommentItemView(context: Context) : ViewGroup(context, null, 0) {
         addView(tv_author)
 
         tv_body = TextView(context).apply {
-            id=R.id.tv_comment_body
+            id = R.id.tv_comment_body
             setTextColor(grayColor)
             textSize = 14f
         }
@@ -196,6 +195,7 @@ class CommentItemView(context: Context) : ViewGroup(context, null, 0) {
                 shimmerDrawable.stop()
                 foreground = null
             }
+
 
             Glide.with(context)
                 .load(item.user.avatar)

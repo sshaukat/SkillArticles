@@ -7,19 +7,14 @@ apply from: "../versions.gradle"
 
 android {
     compileSdkVersion 29
-    buildToolsVersion '29.0.3'
+    buildToolsVersion "29.0.2"
     defaultConfig {
         applicationId "ru.skillbranch.skillarticles"
         minSdkVersion 23
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "ru.skillbranch.skillarticles.CustomTestRunner"
-        javaCompileOptions {
-            annotationProcessorOptions {
-                arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
-            }
-        }
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
@@ -34,19 +29,16 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-
     androidExtensions {
         experimental = true
     }
-    testOptions {
-        unitTests.returnDefaultValues = true
+    defaultConfig {
+        testInstrumentationRunner "ru.skillbranch.skillarticles.CustomTestRunner"
     }
-    packagingOptions {
-        exclude 'META-INF/ASL2.0'
-        exclude 'META-INF/AL2.0'
-        exclude 'META-INF/LGPL2.1'
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
-
 }
 
 dependencies {

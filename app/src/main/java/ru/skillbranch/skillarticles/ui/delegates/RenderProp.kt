@@ -4,22 +4,23 @@ import ru.skillbranch.skillarticles.ui.base.Binding
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
-class RenderProp<T: Any>(
+class RenderProp<T : Any>(
     var value: T,
     private val needInit: Boolean = true,
-    private val onChange: ((T)-> Unit)? = null
+    private val onChange: ((T) -> Unit)? = null
 ) : ReadWriteProperty<Binding, T> {
-    private val listeners : MutableList<()->Unit> = mutableListOf()
+    private val listeners: MutableList<() -> Unit> = mutableListOf()
 
     fun bind() {
         if (needInit) onChange?.invoke(value)
     }
+
     operator fun provideDelegate(
         thisRef: Binding,
-        prop: KProperty<*>
+        property: KProperty<*>
     ): ReadWriteProperty<Binding, T> {
-        val delegate : RenderProp<T> = RenderProp(value,false,onChange)
-        registerDelegate(thisRef, prop.name, delegate)
+        val delegate = RenderProp(value, needInit, onChange)
+        registerDelegate(thisRef, property.name, delegate)
         return delegate
     }
 
@@ -32,13 +33,11 @@ class RenderProp<T: Any>(
         if (listeners.isNotEmpty()) listeners.forEach { it.invoke() }
     }
 
-    //register additional listener
-    fun addListener(listener: ()->Unit){
+    fun addListener(listener: () -> Unit) {
         listeners.add(listener)
     }
 
-    private fun registerDelegate(thisRef: Binding, name: String, delegate: RenderProp<T>){
+    private fun registerDelegate(thisRef: Binding, name: String, delegate: RenderProp<T>) {
         thisRef.delegates[name] = delegate
     }
 }
-

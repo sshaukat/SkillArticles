@@ -10,9 +10,7 @@ import ru.skillbranch.skillarticles.ui.custom.ArticleItemView
 
 class ArticlesAdapter(
     private val listener: (ArticleItem, Boolean) -> Unit
-) :
-    PagedListAdapter<ArticleItem, ArticleVH>(ArticleDiffCallback()){
-
+) : PagedListAdapter<ArticleItem, ArticleVH>(ArticleDiffCallback()) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ArticleVH {
         val view = ArticleItemView(parent.context)
         return ArticleVH(view)
@@ -21,19 +19,24 @@ class ArticlesAdapter(
     override fun onBindViewHolder(holder: ArticleVH, position: Int) {
         holder.bind(getItem(position), listener)
     }
+
 }
 
-class ArticleDiffCallback: DiffUtil.ItemCallback<ArticleItem>(){
-    override fun areItemsTheSame(oldItem: ArticleItem, newItem: ArticleItem): Boolean = oldItem.id == newItem.id
+class ArticleDiffCallback : DiffUtil.ItemCallback<ArticleItem>() {
+    override fun areItemsTheSame(oldItem: ArticleItem, newItem: ArticleItem): Boolean =
+        oldItem.id == newItem.id
 
-    override fun areContentsTheSame(oldItem: ArticleItem, newItem: ArticleItem): Boolean = oldItem == newItem
+    override fun areContentsTheSame(oldItem: ArticleItem, newItem: ArticleItem): Boolean =
+        oldItem == newItem
 }
 
-class ArticleVH(val containerView: View): RecyclerView.ViewHolder(containerView){
+class ArticleVH(val containerView: View) : RecyclerView.ViewHolder(containerView) {
     fun bind(
         item: ArticleItem?,
         listener: (ArticleItem, Boolean) -> Unit
-        ){
-        (containerView as ArticleItemView).bind(item!!,listener)
+    ) {
+
+        //if use placeholder item may be null
+        (containerView as ArticleItemView).bind(item!!, listener)
     }
 }

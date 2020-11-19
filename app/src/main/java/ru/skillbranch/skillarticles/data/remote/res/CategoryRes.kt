@@ -5,4 +5,3 @@ data class CategoryRes(
     val title: String,
     val icon: String
 )
-

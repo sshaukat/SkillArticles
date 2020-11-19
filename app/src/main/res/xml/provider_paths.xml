@@ -2,8 +2,8 @@
 <paths>
     <external-path
         name="external_files"
-        path="."/>
+        path="." />
     <cache-path
         name="share"
-        path="image_manager_disk_cache"/>
+        path="image_manager_disk_cache" />
 </paths>

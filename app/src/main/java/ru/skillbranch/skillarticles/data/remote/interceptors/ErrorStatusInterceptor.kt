@@ -7,7 +7,7 @@ import ru.skillbranch.skillarticles.data.JsonConverter.moshi
 import ru.skillbranch.skillarticles.data.remote.err.ApiError
 import ru.skillbranch.skillarticles.data.remote.err.ErrorBody
 
-class ErrorStatusInterceptor: Interceptor{
+class ErrorStatusInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val res = chain.proceed(chain.request())
 
@@ -15,19 +15,17 @@ class ErrorStatusInterceptor: Interceptor{
 
         val errMessage = try {
             moshi.adapter(ErrorBody::class.java).fromJson(res.body!!.string())?.message
-        }catch (e: JsonEncodingException){
+        } catch (e: JsonEncodingException) {
             e.message
         }
 
-        when(res.code){
+        when (res.code) {
             400 -> throw ApiError.BadRequest(errMessage)
             401 -> throw ApiError.Unauthorized(errMessage)
             403 -> throw ApiError.Forbidden(errMessage)
             404 -> throw ApiError.NotFound(errMessage)
             500 -> throw ApiError.InternalServerError(errMessage)
             else -> throw ApiError.UnknownError(errMessage)
-
         }
     }
-
 }

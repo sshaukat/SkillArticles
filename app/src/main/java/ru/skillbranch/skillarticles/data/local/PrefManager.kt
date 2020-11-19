@@ -1,6 +1,5 @@
 package ru.skillbranch.skillarticles.data.local
 
-import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
@@ -17,13 +16,12 @@ import ru.skillbranch.skillarticles.data.models.AppSettings
 import ru.skillbranch.skillarticles.data.models.User
 
 
-
-@SuppressLint("RestrictedApi")
 object PrefManager {
 
-    internal val preferences : SharedPreferences by lazy {
+    internal val preferences: SharedPreferences by lazy {
         PreferenceManager.getDefaultSharedPreferences(App.applicationContext())
     }
+
     var isDarkMode by PrefDelegate(false)
     var isBigText by PrefDelegate(false)
     var accessToken by PrefDelegate("")
@@ -32,29 +30,47 @@ object PrefManager {
 
     val isAuthLive: LiveData<Boolean> by lazy {
         val token by PrefLiveDelegate("accessToken", "", preferences)
-        token.map{it.isNotEmpty()}
+        token.map { it.isNotEmpty() }
     }
-    val profileLive: LiveData<User?> by PrefLiveObjDelegate("profile", moshi.adapter(User::class.java), preferences)
 
-    fun getAppSettings() = MediatorLiveData<AppSettings>().apply{
-        val isDarkModeLive: LiveData<Boolean> by PrefLiveDelegate("isDarkMode",false, preferences)
-        val isBigTextLive: LiveData<Boolean> by PrefLiveDelegate("isBigText",false, preferences)
+    val profileLive: LiveData<User?> by PrefLiveObjDelegate(
+        "profile",
+        moshi.adapter(User::class.java),
+//        UserJsonAdapter(moshi),
+        preferences
+    )
+
+    val appSettings = MediatorLiveData<AppSettings>().apply {
+        val isDarkModeLive: LiveData<Boolean> by PrefLiveDelegate("isDarkMode", false, preferences)
+        val isBigTextLive: LiveData<Boolean> by PrefLiveDelegate("isBigText", false, preferences)
         value = AppSettings()
 
-        addSource(isDarkModeLive){
-            value = value!!.copy(isDarkMode = it)
+        addSource(isDarkModeLive) {
+            value = value?.copy(isDarkMode = it)
         }
-        addSource(isBigTextLive){
-            value = value!!.copy(isBigText = it)
+        addSource(isBigTextLive) {
+            value = value?.copy(isBigText = it)
         }
-
     }.distinctUntilChanged()
 
     fun clearAll() {
-        preferences.edit().clear().apply()
+        preferences.edit()
+            .clear()
+            .apply()
+    }
+
+    fun updateSettings(appSettings: AppSettings) {
+        preferences.edit().apply {
+            putBoolean(::isDarkMode.name, appSettings.isDarkMode)
+            putBoolean(::isBigText.name, appSettings.isBigText)
+            apply()
+        }
     }
 
     fun replaceAvatarUrl(url: String) {
         profile = profile!!.copy(avatar = url)
     }
+
 }
+
+

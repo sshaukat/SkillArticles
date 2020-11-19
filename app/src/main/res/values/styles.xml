@@ -1,4 +1,5 @@
 <resources>
+
     <!-- global colors -->
     <attr name="darkSurfaceColor" format="color" />
     <attr name="lightSurfaceColor" format="color" />
@@ -11,7 +12,6 @@
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
         <item name="android:statusBarColor">@color/color_primary_dark</item>
-
         <item name="android:textColorSecondary">@color/color_accent</item>
         <item name="colorPrimary">@color/color_primary</item>
         <item name="colorPrimaryVariant">@color/color_primary_dark</item>
@@ -25,12 +25,10 @@
         <item name="colorOnSurface">@color/color_on_surface</item>
         <item name="colorOnBackground">@color/color_gray</item>
         <item name="snackbarStyle">@style/CustomSnackbar</item>
-
-        <item name="darkSurfaceColor"  >#272727</item>
-        <item name="lightSurfaceColor"  >#F6F6F6</item>
-        <item name="darkOnSurfaceColor" >#F6F6F6</item>
-        <item name="lightOnSurfaceColor" >#202020</item>
-
+        <item name="darkSurfaceColor">#272727</item>
+        <item name="lightSurfaceColor">#F6F6F6</item>
+        <item name="darkOnSurfaceColor">#F6F6F6</item>
+        <item name="lightOnSurfaceColor">#202020</item>
     </style>
 
     <style name="ArticleBarsTheme" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar">
@@ -48,7 +46,6 @@
         <item name="android:textColorSecondary">?attr/colorOnPrimary</item>
     </style>
 
-
     <style name="BottombarIcon">
         <item name="android:layout_width">56dp</item>
         <item name="android:layout_height">56dp</item>
@@ -64,7 +61,7 @@
     <style name="CustomSnackbar" parent="Widget.MaterialComponents.Snackbar">
         <item name="layout_insetEdge">bottom</item>
     </style>
-    
+
     <style name="TextInputLayoutAppearance" parent="Widget.Design.TextInputLayout">
         <item name="colorControlNormal">@color/color_gray</item>
         <item name="colorControlActivated">@color/color_accent</item>
@@ -72,14 +69,15 @@
         <item name="android:textColorPrimary">?attr/colorOnSurface</item>
     </style>
 
+
     <style name="NavBarTheme" parent="AppTheme">
         <item name="colorSurface">@color/color_article_bar</item>
         <item name="colorOnPrimary">@color/color_primary</item>
     </style>
 
+
     <style name="NavBarStyle" parent="Widget.MaterialComponents.BottomNavigationView">
         <item name="itemTextColor">@color/tint_color</item>
         <item name="itemIconTint">@color/tint_color</item>
     </style>
-
 </resources>

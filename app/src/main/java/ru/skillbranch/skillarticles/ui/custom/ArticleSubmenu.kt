@@ -20,22 +20,20 @@ class ArticleSubmenu @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : ConstraintLayout(context, attrs, defStyleAttr),CoordinatorLayout.AttachedBehavior {
-    override fun getBehavior(): CoordinatorLayout.Behavior<*> {
-        return SubmenuBehavior()
-    }
+
+
     var isOpen = false
     private var centerX: Float = context.dpToPx(200)
     private var centerY: Float = context.dpToPx(96)
 
     init {
-        //View.inflate(context, R.layout.layout_submenu, this)
+//        View.inflate(context, R.layout.layout_submenu, this)
         //add material bg for handle elevation and color surface
         val materialBg = MaterialShapeDrawable.createWithElevationOverlay(context)
         materialBg.elevation = elevation
         background = materialBg
+        visibility = View.GONE
     }
-
-
 
     fun open() {
         if (isOpen || !isAttachedToWindow) return
@@ -115,6 +113,10 @@ class ArticleSubmenu @JvmOverloads constructor(
             override fun createFromParcel(parcel: Parcel) = SavedState(parcel)
             override fun newArray(size: Int): Array<SavedState?> = arrayOfNulls(size)
         }
+    }
+
+    override fun getBehavior(): CoordinatorLayout.Behavior<*> {
+        return SubmenuBehavior()
     }
 
 }

@@ -7,25 +7,27 @@ import com.facebook.stetho.Stetho
 import ru.skillbranch.skillarticles.data.local.PrefManager
 import ru.skillbranch.skillarticles.data.remote.NetworkMonitor
 
-class App: Application() {
+class App : Application() {
 
-    companion object{
-        private var instance : App? = null
+    companion object {
+        private var instance: App? = null
 
-        fun applicationContext() : Context {
+        fun applicationContext(): Context {
             return instance!!.applicationContext
         }
     }
+
     init {
         instance = this
     }
 
     override fun onCreate() {
         super.onCreate()
-        //start network monitoring
-        NetworkMonitor.registerNetworkMonitor(applicationContext)
 
-        //set saved night/day mode
+        //start network monitoring
+        NetworkMonitor.registerNetworkMonitor(applicationContext())
+
+        //set saved night/day moe
         val mode = if (PrefManager.isDarkMode == true) AppCompatDelegate.MODE_NIGHT_YES
         else AppCompatDelegate.MODE_NIGHT_NO
         AppCompatDelegate.setDefaultNightMode(mode)

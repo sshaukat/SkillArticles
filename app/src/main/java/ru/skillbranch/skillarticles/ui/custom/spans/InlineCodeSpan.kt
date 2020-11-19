@@ -32,8 +32,8 @@ class InlineCodeSpan(
         fm: Paint.FontMetricsInt?
     ): Int {
         paint.forText {
-            val measureText = paint.measureText(text.toString(),start,end)
-            measureWidth = (measureText + 2*padding).toInt()
+            val measureText = paint.measureText(text.toString(), start, end)
+            measureWidth = (measureText + 2 * padding).toInt()
         }
         return measureWidth
     }
@@ -50,12 +50,12 @@ class InlineCodeSpan(
         paint: Paint
     ) {
         paint.forBackground {
-            rect.set(x,top.toFloat(),x + measureWidth,y + paint.descent())
-            canvas.drawRoundRect(rect,cornerRadius,cornerRadius,paint)
+            rect.set(x, top.toFloat(), x + measureWidth, y + paint.descent())
+            canvas.drawRoundRect(rect, cornerRadius, cornerRadius, paint)
         }
 
         paint.forText {
-            canvas.drawText(text, start,end, x+padding,y.toFloat(),paint)
+            canvas.drawText(text, start, end, x + padding, y.toFloat(), paint)
         }
     }
 
@@ -82,7 +82,6 @@ class InlineCodeSpan(
 
         color = bgColor
         style = Paint.Style.FILL
-
 
         block()
 

@@ -45,7 +45,7 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_name"
-        app:layout_constraintHorizontal_chainStyle="packed"/>
+        app:layout_constraintHorizontal_chainStyle="packed" />
 
     <TextView
         android:id="@+id/tv_respect"
@@ -76,7 +76,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_rating"
-        tools:text="lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum"/>
+        tools:text="lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -4,7 +4,7 @@ import android.net.Uri
 import androidx.core.content.FileProvider
 
 class ImageFileProvider : FileProvider() {
-    override fun getType(uri: Uri): String? =
-        "image/jpeg"
-
+    override fun getType(uri: Uri): String? {
+        return "image/jpeg"
+    }
 }

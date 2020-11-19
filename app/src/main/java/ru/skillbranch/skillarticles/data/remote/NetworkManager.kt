@@ -11,29 +11,33 @@ import ru.skillbranch.skillarticles.data.remote.interceptors.NetworkStatusInterc
 import ru.skillbranch.skillarticles.data.remote.interceptors.TokenAuthenticator
 import java.util.concurrent.TimeUnit
 
+
 object NetworkManager {
-    val api : RestService by lazy {
+    val api: RestService by lazy {
         //client
         val logging = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
 
         val client = OkHttpClient().newBuilder()
-            .readTimeout(2, TimeUnit.SECONDS)//socket timeout(GET)
-            .writeTimeout(5, TimeUnit.SECONDS)//socket timeout(POST, PUT, etc)
-            .authenticator(TokenAuthenticator()) //refresh token if response status code 401
-            .addInterceptor(NetworkStatusInterceptor()) //intercept network status
-            .addInterceptor(logging) //intercept req/res for logging
-            .addInterceptor(ErrorStatusInterceptor()) //intercept status error
+            .readTimeout(2, TimeUnit.SECONDS) //socket timeout (GET)
+            .writeTimeout(5, TimeUnit.SECONDS) //socket timeout (POST,PUT, etc)
+            .authenticator(TokenAuthenticator())
+            .addInterceptor(NetworkStatusInterceptor())
+            .addInterceptor(logging)
+            .addInterceptor(ErrorStatusInterceptor())
             .build()
 
         //retrofit
         val retrofit = Retrofit.Builder()
-            .client(client) //set http client
-            .addConverterFactory(MoshiConverterFactory.create(moshi)) //set json converter/parser
+            .client(client)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
             .baseUrl(AppConfig.BASE_URL)
             .build()
+
         retrofit.create(RestService::class.java)
+
     }
 }
+
 

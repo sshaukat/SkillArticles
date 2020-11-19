@@ -9,13 +9,13 @@ import java.util.*
 object JsonConverter {
     //json converter
     val moshi = Moshi.Builder()
-        .add(DateAdapter()) //convert long timestamp to Date
-        .add(KotlinJsonAdapterFactory()) //convert json to class by reflection
+        .add(DateAdapter())
+        .add(KotlinJsonAdapterFactory())
         .build()
 
-    class DateAdapter{
+    class DateAdapter {
         @FromJson
-        fun fromJson(timestamp:Long) = Date(timestamp)
+        fun fromJson(timestamp: Long) = Date(timestamp)
 
         @ToJson
         fun toJson(date: Date) = date.time

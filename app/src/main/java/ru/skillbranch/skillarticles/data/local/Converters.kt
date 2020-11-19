@@ -10,15 +10,16 @@ class DateConverter {
     fun timestampToDate(timestamp: Long): Date = Date(timestamp)
 
     @TypeConverter
-    fun dateToTimestamp(date:Date):Long = date.time
+    fun dateToTimestamp(date: Date): Long = date.time
 }
 
-class MarkdownConverter{
+class MarkdownConverter {
     @TypeConverter
-    fun toMarkdown(content:String?): List<MarkdownElement>? = content?.let { MarkdownParser.parse(it) }
+    fun toMarkdown(content: String?): List<MarkdownElement>? =
+        content?.let { MarkdownParser.parse(it) }
 }
 
-class ListConverter{
+class ListConverter {
     @TypeConverter
     fun toList(str: String?): List<String> = str?.split(",") ?: emptyList()
 }

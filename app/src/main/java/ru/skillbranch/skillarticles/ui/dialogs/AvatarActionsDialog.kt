@@ -13,15 +13,14 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.android.synthetic.main.bottom_sheet.*
 import ru.skillbranch.skillarticles.R
 
-class AvatarActionsDialog :BottomSheetDialogFragment() {
-
+class AvatarActionsDialog : BottomSheetDialogFragment() {
     companion object {
+        const val AVATAR_ACTIONS_KEY = "AVATAR_ACTIONS_KEY"
         const val SELECT_ACTION_KEY = "SELECT_ACTION_KEY"
-        const val AVATAR_ACTIONS_KEY="AVATAR_ACTIONS_KEY"
-        const val CAMERA_KEY="CAMERA_KEY"
-        const val GALLERY_KEY="GALLERY_KEY"
-        const val EDIT_KEY="EDIT_KEY"
-        const val DELETE_KEY="DELETE_KEY"
+        const val CAMERA_KEY = "CAMERA_KEY"
+        const val GALLERY_KEY = "GALLERY_KEY"
+        const val EDIT_KEY = "EDIT_KEY"
+        const val DELETE_KEY = "DELETE_KEY"
     }
 
     private val args: AvatarActionsDialogArgs by navArgs()
@@ -35,29 +34,28 @@ class AvatarActionsDialog :BottomSheetDialogFragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val hasCamera = requireContext().packageManager.hasSystemFeature(FEATURE_CAMERA_ANY)
         //check device has camera
+        val hasCamera = requireContext().packageManager.hasSystemFeature(FEATURE_CAMERA_ANY)
         item_camera.isVisible = hasCamera
-        item_camera.setOnClickListener{
+        item_camera.setOnClickListener {
             setFragmentResult(AVATAR_ACTIONS_KEY, bundleOf(SELECT_ACTION_KEY to CAMERA_KEY))
             dismiss()
         }
 
-        item_gallery.setOnClickListener{
+        item_gallery.setOnClickListener {
             setFragmentResult(AVATAR_ACTIONS_KEY, bundleOf(SELECT_ACTION_KEY to GALLERY_KEY))
             dismiss()
         }
 
         val hasAvatar = args.hasAvatar
-
         item_edit.isVisible = hasAvatar
-        item_edit.setOnClickListener{
+        item_edit.setOnClickListener {
             setFragmentResult(AVATAR_ACTIONS_KEY, bundleOf(SELECT_ACTION_KEY to EDIT_KEY))
             dismiss()
         }
 
         item_delete.isVisible = hasAvatar
-        item_delete.setOnClickListener{
+        item_delete.setOnClickListener {
             setFragmentResult(AVATAR_ACTIONS_KEY, bundleOf(SELECT_ACTION_KEY to DELETE_KEY))
             dismiss()
         }

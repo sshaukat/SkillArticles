@@ -10,11 +10,11 @@ import ru.skillbranch.skillarticles.data.remote.req.EditProfileReq
 interface IProfileRepository {
     fun getProfile(): LiveData<User?>
     suspend fun uploadAvatar(body: MultipartBody.Part)
-    suspend fun editProfile(name: String, about: String)
     suspend fun removeAvatar()
+    suspend fun editProfile(name: String, about: String)
 }
 
-object ProfileRepository : IProfileRepository{
+object ProfileRepository : IProfileRepository {
     private val prefs = PrefManager
     private val network = NetworkManager.api
 
@@ -25,17 +25,13 @@ object ProfileRepository : IProfileRepository{
         prefs.replaceAvatarUrl(url)
     }
 
-    override suspend fun editProfile(name: String, about: String) {
-        val profile = network.edit(EditProfileReq(name, about), prefs.accessToken)
-        prefs.profile = prefs.profile!!.copy(
-            name = profile.name,
-            about = profile.about
-        )
-    }
-
     override suspend fun removeAvatar() {
         val (url) = network.remove(prefs.accessToken)
         prefs.replaceAvatarUrl(url)
     }
 
+    override suspend fun editProfile(name: String, about: String) {
+        val user = network.editProfile(EditProfileReq(name, about), prefs.accessToken)
+        prefs.profile = user
+    }
 }

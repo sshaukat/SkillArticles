@@ -13,27 +13,30 @@ object NetworkMonitor {
     val isConnectedLive = MutableLiveData(false)
     val networkTypeLive = MutableLiveData(NetworkType.NONE)
 
-    private lateinit var cm : ConnectivityManager
+    private lateinit var cm: ConnectivityManager
 
-    fun registerNetworkMonitor(ctx: Context){
+    fun registerNetworkMonitor(ctx: Context) {
         cm = ctx.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-        obtainNetworkType(cm.activeNetwork?.let { cm.getNetworkCapabilities(it) })
-            .also{ networkTypeLive.postValue(it)}
+        obtainNEtworkType(cm.activeNetwork?.let { cm.getNetworkCapabilities(it) })
+            .also { networkTypeLive.postValue(it) }
+
         cm.registerNetworkCallback(
             NetworkRequest.Builder().build(),
-            object : ConnectivityManager.NetworkCallback(){
+            object : ConnectivityManager.NetworkCallback() {
                 override fun onCapabilitiesChanged(
                     network: Network,
                     networkCapabilities: NetworkCapabilities
                 ) {
-                    networkTypeLive.postValue(obtainNetworkType(networkCapabilities))
+                    networkTypeLive.postValue(obtainNEtworkType(networkCapabilities))
                 }
+
                 override fun onLost(network: Network) {
                     isConnected = false
                     isConnectedLive.postValue(false)
                     networkTypeLive.postValue(NetworkType.NONE)
                 }
+
                 override fun onAvailable(network: Network) {
                     isConnected = true
                     isConnectedLive.postValue(true)
@@ -42,18 +45,19 @@ object NetworkMonitor {
         )
     }
 
-    private fun obtainNetworkType(networkCapabilities: NetworkCapabilities?): NetworkType = when{
+    fun obtainNEtworkType(networkCapabilities: NetworkCapabilities?): NetworkType = when {
         networkCapabilities == null -> NetworkType.NONE
-        networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)-> NetworkType.WIFI
+        networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> NetworkType.WIFI
         networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> NetworkType.CELLULAR
         else -> NetworkType.UNKNOWN
     }
+
     @VisibleForTesting(otherwise = VisibleForTesting.NONE)
     fun setNetworkIsConnected(isConnected: Boolean = true) {
         this.isConnected = isConnected
     }
 }
 
-enum class NetworkType{
-    NONE, UNKNOWN,WIFI,CELLULAR
+enum class NetworkType {
+    NONE, UNKNOWN, WIFI, CELLULAR
 }

@@ -5,6 +5,6 @@ data class LikeRes(
     val likeCount: Int
 )
 
-data class BookmarkRes (
+data class BookmarkRes(
     val message: String
 )

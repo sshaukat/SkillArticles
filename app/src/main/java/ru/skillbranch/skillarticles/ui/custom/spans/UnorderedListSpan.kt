@@ -28,7 +28,7 @@ class UnorderedListSpan(
         lineEnd: Int, isFirstLine: Boolean, layout: Layout
     ) {
         //only for first line draw bullet
-        if (isFirstLine){
+        if (isFirstLine) {
             paint.withCustomColor {
                 canvas.drawCircle(
                     gapWidth + currentMarginLocation + bulletRadius,

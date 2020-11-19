@@ -1,16 +1,37 @@
 package ru.skillbranch.skillarticles.extensions
 
-import java.util.*
+import android.text.Editable
+import android.text.TextWatcher
+import android.util.Patterns
+import com.google.android.material.textfield.TextInputEditText
 
-fun String?.indexesOf(substr: String, ignoreCase: Boolean = true): List<Int>{
-    this ?: return listOf()
-    if (substr.isBlank()) return listOf()
-    val searchResults = mutableListOf<Int>()
-    val searchString = if (ignoreCase)this.toLowerCase(Locale.getDefault()) else this
-    for (index in 0 until(searchString.length - substr.length)){
-      if (searchString.substring(index,index+substr.length) == substr ){
-           searchResults.add(index)
+fun String?.indexesOf(substr: String, ignoreCase: Boolean = true): List<Int> {
+    val result: MutableList<Int> = mutableListOf()
+    var currentIndex = 0
+
+    if (this.isNullOrEmpty() || substr == "") {
+        return result
+    } else {
+        while (currentIndex <= this.length) {
+            val index = this.indexOf(substr, currentIndex, ignoreCase)
+            if (index == -1) break
+            result.add(index)
+            currentIndex = this.indexOf(substr, index, ignoreCase) + 1
         }
     }
-    return searchResults
+    return result
+}
+
+fun String.isValidEmail(): Boolean = this.isNotEmpty() && Patterns.EMAIL_ADDRESS.matcher(this).matches()
+
+fun TextInputEditText.afterTextChanged(afterTextChanged: (String) -> Unit) {
+    this.addTextChangedListener(object : TextWatcher {
+        override fun afterTextChanged(s: Editable?) {
+            afterTextChanged.invoke(s.toString())
+        }
+
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+    })
 }
